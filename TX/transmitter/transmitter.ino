@@ -1,6 +1,31 @@
 #include <Wire.h>
 #include <TimerOne.h>
 
+//libs required for radio
+#include <SPI.h>
+#include "nRF24L01.h"
+#include "RF24.h"
+#include "printf.h"
+
+//radio setup
+//set nRF24l01 SPI bus pins 9 and 10
+#define CE_PIN                        9
+#define CSN_PIN                       10
+
+RF24 radio(CE_PIN, CSN_PIN);
+
+int payload[1];                             //payload. Frame structure(place -- description):
+                                            //0 - time
+
+int payback[0];                             //Telemetry response
+byte rssi;
+int transmitted_packages = 1, failed_packages;
+unsigned long RSSI_timer;
+                                            
+                                            // Topology
+byte addresses[][6] = {"1Node","2Node"};    // Radio pipe addresses for the 2 nodes to communicate.
+
+//IMU setup
 #define    MPU9250_ADDRESS            0x68
 #define    MAG_ADDRESS                0x0C
 
@@ -9,12 +34,12 @@
 #define    GYRO_FULL_SCALE_1000_DPS   0x10
 #define    GYRO_FULL_SCALE_2000_DPS   0x18
 
-#define    ACC_FULL_SCALE_2_G        0x00  
-#define    ACC_FULL_SCALE_4_G        0x08
-#define    ACC_FULL_SCALE_8_G        0x10
-#define    ACC_FULL_SCALE_16_G       0x18
+#define    ACC_FULL_SCALE_2_G         0x00  
+#define    ACC_FULL_SCALE_4_G         0x08
+#define    ACC_FULL_SCALE_8_G         0x10
+#define    ACC_FULL_SCALE_16_G        0x18
 
-
+#define    INTERRUPT_CALLBACK_PIN     8
 
 // This function read Nbytes bytes from I2C device at address Address. 
 // Put read bytes starting at register Register in the Data array. 
@@ -32,7 +57,6 @@ void I2Cread(uint8_t Address, uint8_t Register, uint8_t Nbytes, uint8_t* Data)
     Data[index++]=Wire.read();
 }
 
-
 // Write a byte (Data) in device (Address) at register (Register)
 void I2CwriteByte(uint8_t Address, uint8_t Register, uint8_t Data)
 {
@@ -42,7 +66,6 @@ void I2CwriteByte(uint8_t Address, uint8_t Register, uint8_t Data)
   Wire.write(Data);
   Wire.endTransmission();
 }
-
 
 
 // Initial time
@@ -55,6 +78,20 @@ void setup()
   // Arduino initializations
   Wire.begin();
   Serial.begin(9600);
+
+  //Radio setup
+  printf_begin();                             //
+  radio.begin();                              //initialize radio
+  radio.setAutoAck(1);                        //enable autoACK
+  radio.enableAckPayload();                   //allow optional ACK payloads
+  radio.setRetries(0,15);                     // Smallest time between retries, max no. of retries
+  radio.setPayloadSize(1);                    // Here we are sending 1-byte payloads to test the call-response speed
+  radio.openWritingPipe(addresses[1]);        // Both radios listen on the same pipes by default, and switch when writing
+  radio.openReadingPipe(1,addresses[0]);      // Open a reading pipe on address 0, pipe 1
+  radio.startListening();                     // Start listening
+  radio.powerUp();
+  radio.printDetails();                       // Dump the configuration of the rf unit for debugging
+  
   
   // Set accelerometers low pass filter at 5Hz
   I2CwriteByte(MPU9250_ADDRESS,29,0x06);
@@ -72,18 +109,13 @@ void setup()
   // Request continuous magnetometer measurements in 16 bits
   I2CwriteByte(MAG_ADDRESS,0x0A,0x16);
   
-   pinMode(13, OUTPUT);
+  pinMode(INTERRUPT_CALLBACK_PIN, OUTPUT);
   Timer1.initialize(10000);         // initialize timer1, and set a 1/2 second period
   Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
-  
-  
+    
   // Store initial time
   ti=millis();
 }
-
-
-
-
 
 // Counter
 long int cpt=0;
@@ -91,7 +123,7 @@ long int cpt=0;
 void callback()
 { 
   intFlag=true;
-  digitalWrite(13, digitalRead(13) ^ 1);
+  digitalWrite(INTERRUPT_CALLBACK_PIN, digitalRead(INTERRUPT_CALLBACK_PIN) ^ 1);
 }
 
 // Main loop, read and display data
@@ -99,11 +131,14 @@ void loop()
 {
   while (!intFlag);
   intFlag=false;
+
+  radio.stopListening();
   
   // Display time
   Serial.print (millis()-ti,DEC);
   Serial.print ("\t");
-
+  
+  payload[0] = millis()-ti;
   
   // _______________
   // ::: Counter :::
@@ -186,7 +221,12 @@ void loop()
   Serial.print (mz-700,DEC);  
   Serial.print ("\t");
   
-  
+  //send data
+  if(radio.write(&payload, sizeof(payload))){
+  }else{
+    failed_packages++;
+  }
+   
   
   // End of line
   Serial.println("");
