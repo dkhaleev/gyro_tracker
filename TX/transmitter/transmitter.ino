@@ -14,10 +14,22 @@
 
 RF24 radio(CE_PIN, CSN_PIN);
 
-int payload[1];                             //payload. Frame structure(place -- description):
-                                            //0 - time
+//byte payload[2];                             //payload. Frame structure(place -- description):
+//                                             
+//
+//byte payback[2];                             //Telemetry response
 
-int payback[0];                             //Telemetry response
+typedef struct{
+  unsigned long int core_time;
+}
+P_t;
+P_t payload;
+
+typedef struct{
+  unsigned long int core_time;  
+}
+B_t;
+B_t payback;
 byte rssi;
 int transmitted_packages = 1, failed_packages;
 unsigned long RSSI_timer;
@@ -86,9 +98,9 @@ void setup()
   radio.enableAckPayload();                   //allow optional ACK payloads
   radio.setRetries(0,15);                     // Smallest time between retries, max no. of retries
   radio.setPayloadSize(1);                    // Here we are sending 1-byte payloads to test the call-response speed
-  radio.openWritingPipe(addresses[1]);        // Both radios listen on the same pipes by default, and switch when writing
-  radio.openReadingPipe(1,addresses[0]);      // Open a reading pipe on address 0, pipe 1
-  radio.startListening();                     // Start listening
+  radio.openWritingPipe(addresses[0]);        // Both radios listen on the same pipes by default, and switch when writing
+  radio.openReadingPipe(1,addresses[1]);      // Open a reading pipe on address 0, pipe 1
+//  radio.startListening();                     // Start listening
   radio.powerUp();
   radio.printDetails();                       // Dump the configuration of the rf unit for debugging
   
@@ -133,22 +145,23 @@ void loop()
   intFlag=false;
 
   radio.stopListening();
-  
-  // Display time
-  Serial.print (millis()-ti,DEC);
-  Serial.print ("\t");
-  
-  payload[0] = millis()-ti;
-  
+
   // _______________
   // ::: Counter :::
-  
+  cpt++;
   // Display data counter
-//  Serial.print (cpt++,DEC);
+//  Serial.print (cpt,DEC);
+//  Serial.print ("\t");
+//payload[0] = cpt;
+  
+  
+  // Display time
+//  Serial.print (millis()-ti,DEC);
 //  Serial.print ("\t");
   
- 
- 
+//  payload[0] = millis()-ti;
+  payload.core_time = millis()-ti;
+  
   // ____________________________________
   // :::  accelerometer and gyroscope ::: 
 
@@ -171,20 +184,20 @@ void loop()
     // Display values
   
   // Accelerometer
-  Serial.print (ax,DEC); 
-  Serial.print ("\t");
-  Serial.print (ay,DEC);
-  Serial.print ("\t");
-  Serial.print (az,DEC);  
-  Serial.print ("\t");
+//  Serial.print (ax,DEC); 
+//  Serial.print ("\t");
+//  Serial.print (ay,DEC);
+//  Serial.print ("\t");
+//  Serial.print (az,DEC);  
+//  Serial.print ("\t");
   
   // Gyroscope
-  Serial.print (gx,DEC); 
-  Serial.print ("\t");
-  Serial.print (gy,DEC);
-  Serial.print ("\t");
-  Serial.print (gz,DEC);  
-  Serial.print ("\t");
+//  Serial.print (gx,DEC); 
+//  Serial.print ("\t");
+//  Serial.print (gy,DEC);
+//  Serial.print ("\t");
+//  Serial.print (gz,DEC);  
+//  Serial.print ("\t");
 
   
   // _____________________
@@ -214,22 +227,38 @@ void loop()
   
   
   // Magnetometer
-  Serial.print (mx+200,DEC); 
-  Serial.print ("\t");
-  Serial.print (my-70,DEC);
-  Serial.print ("\t");
-  Serial.print (mz-700,DEC);  
-  Serial.print ("\t");
+//  Serial.print (mx+200,DEC); 
+//  Serial.print ("\t");
+//  Serial.print (my-70,DEC);
+//  Serial.print ("\t");
+//  Serial.print (mz-700,DEC);  
+//  Serial.print ("\t");
   
   //send data
+  radio.stopListening();
+  printf("Now sending payload %ul \r\n", payload.core_time);
+  radio.openWritingPipe(addresses[0]);       // Open different pipes when writing. Write on pipe 0, address 0
+  radio.openReadingPipe(1,addresses[1]);     // Read on pipe 1, as address 1
+ 
+  
   if(radio.write(&payload, sizeof(payload))){
+    if(!radio.available()){
+      printf("Radio unavailable");
+    }else{
+      while(radio.available()){
+        radio.read(&payback, sizeof(payback));
+        printf("Got response %lu \r\n", payback.core_time);
+      }
+    }    
   }else{
     failed_packages++;
+    printf("Failed packages %d \r\n", failed_packages);
   }
+
    
   
   // End of line
-  Serial.println("");
+//  Serial.println("");
 //  delay(100);    
 }
 
