@@ -15,9 +15,18 @@
 RF24 radio(CE_PIN, CSN_PIN);
 
 struct Payload {
-  long int counter = 0;
-  unsigned long packet_id = 0;
-  unsigned long core_time = 0;
+  long int counter = 0;         //system counter
+  unsigned long packet_id = 0;  //packet ID
+  unsigned long core_time = 0;  //sensor unit core time  
+  int16_t ax = 0;               //acceleration by X axis
+  int16_t ay = 0;               //acceleration by Y axis
+  int16_t az = 0;               //acceleration by Z axis  
+  int16_t gx = 0;               //orientation by X axis
+  int16_t gy = 0;               //orientation by Y axis
+  int16_t gz = 0;               //orientation by Z axis
+  int16_t mx = 0;               //magnetic inclination by X axis
+  int16_t my = 0;               //magnetic inclination by Y axis
+  int16_t mz = 0;               //magnetic inclination by Z axis
 };
 
 byte rssi;
@@ -69,7 +78,6 @@ void I2CwriteByte(uint8_t Address, uint8_t Register, uint8_t Data)
   Wire.endTransmission();
 }
 
-
 // Initial time
 unsigned long ti;
 
@@ -93,7 +101,7 @@ void setup()
   radio.openReadingPipe(1, addresses[1]);     // Open a reading pipe on address 0, pipe 1
   radio.stopListening();
   radio.printDetails();                       // Dump the configuration of the rf unit for debugging
-  radio.setPALevel (RF24_PA_LOW);
+  radio.setPALevel (RF24_PA_HIGH);             // Can be RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
   radio.setDataRate (RF24_1MBPS);
 
   int dataSize = sizeof(Payload);
@@ -149,52 +157,60 @@ void loop()
   // ::: Counter :::
   cpt++;
   // Display data counter
-  //  Serial.print (cpt,DEC);
-  //  Serial.print ("\t");
+//    Serial.print (payload.counter,DEC);
+//    Serial.print ("\t");
 
 
   // Display time
+    payload.core_time = millis() - ti;
+    payload.packet_id = packet_id;
   //  Serial.print (millis()-ti,DEC);
-  //  Serial.print ("\t");
-
-  payload.core_time = millis() - ti;
+    Serial.print(payload.packet_id);
+    Serial.print("\t");
+    Serial.print(payload.core_time);
+    Serial.print ("\t");
 
   // ____________________________________
   // :::  accelerometer and gyroscope :::
 
   // Read accelerometer and gyroscope
-  //  uint8_t Buf[14];
-  //  I2Cread(MPU9250_ADDRESS,0x3B,14,Buf);
+    uint8_t Buf[14];
+    I2Cread(MPU9250_ADDRESS,0x3B,14,Buf);
 
   // Create 16 bits values from 8 bits data
 
   // Accelerometer
-  //  int16_t ax=-(Buf[0]<<8 | Buf[1]);
-  //  int16_t ay=-(Buf[2]<<8 | Buf[3]);
-  //  int16_t az=Buf[4]<<8 | Buf[5];
+    int16_t ax=-(Buf[0]<<8 | Buf[1]);
+    payload.ax = ax;
+    int16_t ay=-(Buf[2]<<8 | Buf[3]);
+    payload.ay = ay;
+    int16_t az=Buf[4]<<8 | Buf[5];
+    payload.az = az;
 
   // Gyroscope
-  //  int16_t gx=-(Buf[8]<<8 | Buf[9]);
-  //  int16_t gy=-(Buf[10]<<8 | Buf[11]);
-  //  int16_t gz=Buf[12]<<8 | Buf[13];
-
+    int16_t gx=-(Buf[8]<<8 | Buf[9]);
+    payload.gx = gx;
+    int16_t gy=-(Buf[10]<<8 | Buf[11]);
+    payload.gy = gy;
+    int16_t gz=Buf[12]<<8 | Buf[13];
+    payload.gz = gz;
   // Display values
 
   // Accelerometer
-  //  Serial.print (ax,DEC);
-  //  Serial.print ("\t");
-  //  Serial.print (ay,DEC);
-  //  Serial.print ("\t");
-  //  Serial.print (az,DEC);
-  //  Serial.print ("\t");
+    Serial.print (payload.ax,DEC);
+    Serial.print ("\t");
+    Serial.print (payload.ay,DEC);
+    Serial.print ("\t");
+    Serial.print (payload.az,DEC);
+    Serial.print ("\t");
 
   // Gyroscope
-  //  Serial.print (gx,DEC);
-  //  Serial.print ("\t");
-  //  Serial.print (gy,DEC);
-  //  Serial.print ("\t");
-  //  Serial.print (gz,DEC);
-  //  Serial.print ("\t");
+    Serial.print (payload.gx,DEC);
+    Serial.print ("\t");
+    Serial.print (payload.gy,DEC);
+    Serial.print ("\t");
+    Serial.print (payload.gz,DEC);
+    Serial.print ("\t");    
 
   // _____________________
   // :::  Magnetometer :::
@@ -202,42 +218,44 @@ void loop()
 
   // Read register Status 1 and wait for the DRDY: Data Ready
 
-  //  uint8_t ST1;
-  //  do
-  //  {
-  //    I2Cread(MAG_ADDRESS,0x02,1,&ST1);
-  //  }
-  //  while (!(ST1&0x01));
+    uint8_t ST1;
+    do
+    {
+      I2Cread(MAG_ADDRESS,0x02,1,&ST1);
+    }
+    while (!(ST1&0x01));
 
   // Read magnetometer data
-  //  uint8_t Mag[7];
-  //  I2Cread(MAG_ADDRESS,0x03,7,Mag);
+    uint8_t Mag[7];
+    I2Cread(MAG_ADDRESS,0x03,7,Mag);
 
 
   // Create 16 bits values from 8 bits data
 
   // Magnetometer
-  //  int16_t mx=-(Mag[3]<<8 | Mag[2]);
-  //  int16_t my=-(Mag[1]<<8 | Mag[0]);
-  //  int16_t mz=-(Mag[5]<<8 | Mag[4]);
-
+    int16_t mx=-(Mag[3]<<8 | Mag[2]);
+    payload.mx = mx;
+    int16_t my=-(Mag[1]<<8 | Mag[0]);
+    payload.my = my;
+    int16_t mz=-(Mag[5]<<8 | Mag[4]);
+    payload.mz = mz;
 
   // Magnetometer
-  //  Serial.print (mx+200,DEC);
-  //  Serial.print ("\t");
-  //  Serial.print (my-70,DEC);
-  //  Serial.print ("\t");
-  //  Serial.print (mz-700,DEC);
-  //  Serial.print ("\t");
-
+    Serial.print (payload.mx+200,DEC);
+    Serial.print ("\t");
+    Serial.print (payload.my-70,DEC);
+    Serial.print ("\t");
+    Serial.print (payload.mz-700,DEC);
+    Serial.print ("\t");
 
   //send data
   radio.powerUp();
   radio.stopListening();
 
-  payload.packet_id = packet_id;
+  printf("\r\n");
+  
   //  printf("Now sending payload %ul \r\n", ti);
-  printf("Now sending payload %ld with time %ld \r\n", payload.packet_id, payload.core_time);
+//  printf("Now sending payload %ld with time %ld \r\n", payload.packet_id, payload.core_time);
   radio.openWritingPipe(addresses[0]);       // Open different pipes when writing. Write on pipe 0, address 0
   radio.openReadingPipe(1, addresses[1]);    // Read on pipe 1, as address 1
 
@@ -248,7 +266,7 @@ void loop()
     } else {
       while (radio.available()) {
         radio.read(&payback, sizeof(Payload));
-        printf("Got response %ld \r\n", payback.core_time);
+//        printf("Got response %ld \r\n", payback.core_time);
       }
     }
   } else {
@@ -262,7 +280,7 @@ void loop()
   // End of line
   //  Serial.println("");
   //debug delay
-  delay(1000);
+  delay(500);
 }
 
 
