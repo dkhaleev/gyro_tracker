@@ -4,7 +4,9 @@
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+
+class QAction;
+class QMenu;
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -16,14 +18,35 @@ public:
   ~MainWindow();
 
 private:
-  Ui::MainWindow *ui;
 
 private slots:
 
 private:
-  QMenu *ParamsMenu;
-  QMenu *PortMenu;
-  QMenu *BaudrateMenu;
+  void createActions();
+  void createMenus();
+  void createToolBars();
+
+  QMenu *fileMenu;
+  QMenu *viewMenu;
+  QMenu *paramsMenu;
+  QMenu *portMenu;
+  QMenu *baudrateMenu;
+  QMenu *aboutMenu;
+
+  QToolBar *fileToolBar;
+
+  QAction *connectAct;
+  QAction *disconnectAct;
+
+  typedef struct _portConfig{
+    QString name;
+    QString description;
+    QString manufacturer;
+    QString systemLocation;
+    QString vendorIdentifier;
+    QString productIdentifier;
+  }*portConfig;
+
 
 };
 #endif // MAINWINDOW_H
