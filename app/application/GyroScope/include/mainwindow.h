@@ -26,6 +26,7 @@ private:
   void createActions();
   void createMenus();
   void createToolBars();
+  void createStatusBar();
 
   void loadSettings();
   void saveSettings();
@@ -47,6 +48,7 @@ private:
   //global port variables;
   QString portName;
   QString portLocation;
+  bool isConnected = false;
 };
 
 typedef struct _portConfig{

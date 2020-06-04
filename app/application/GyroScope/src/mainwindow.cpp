@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   createActions();
   createMenus();
   createToolBars();
+  createStatusBar();
 
 }
 
@@ -49,6 +50,17 @@ void MainWindow::createActions(){
   connectAct = new QAction(QIcon(""), tr("&Connect"), this);
 
   disconnectAct = new QAction(QIcon(""), tr("&Disconnect"), this);
+
+  QTextStream(stdout) << "PN " << portName << "\r\n";
+
+  if(isConnected){
+      connectAct->setDisabled(true);
+    }else{
+      if(portName == ""){
+          connectAct->setDisabled(true);
+        }
+      disconnectAct->setDisabled(true);
+    }
 
 }
 
@@ -119,6 +131,17 @@ void MainWindow::createToolBars(){
   fileToolBar->setContextMenuPolicy(Qt::NoContextMenu);
   fileToolBar->addAction(connectAct);
   fileToolBar->addAction(disconnectAct);
+}
+
+//Status Bar
+
+void MainWindow::createStatusBar(){
+  if(isConnected){
+      statusBar()->showMessage("Ready");
+    } else {
+      statusBar()->showMessage("Disconnected");
+    }
+
 }
 
 void MainWindow::portMenuActionTriggered(QAction * action){
