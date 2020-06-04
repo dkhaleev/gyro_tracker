@@ -20,11 +20,15 @@ public:
 private:
 
 private slots:
+  void portMenuActionTriggered(QAction * action);
 
 private:
   void createActions();
   void createMenus();
   void createToolBars();
+
+  void loadSettings();
+  void saveSettings();
 
   QMenu *fileMenu;
   QMenu *viewMenu;
@@ -38,15 +42,21 @@ private:
   QAction *connectAct;
   QAction *disconnectAct;
 
-  typedef struct _portConfig{
-    QString name;
-    QString description;
-    QString manufacturer;
-    QString systemLocation;
-    QString vendorIdentifier;
-    QString productIdentifier;
-  }*portConfig;
+  QString settingsFileName;
 
-
+  //global port variables;
+  QString portName;
+  QString portLocation;
 };
+
+typedef struct _portConfig{
+  QString name;
+  QString description;
+  QString manufacturer;
+  QString systemLocation;
+  QString vendorIdentifier;
+  QString productIdentifier;
+} *portConfig;
+//Q_DECLARE_METATYPE(_portConfig);
+
 #endif // MAINWINDOW_H

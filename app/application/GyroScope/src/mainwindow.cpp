@@ -6,14 +6,22 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QList>
 #include <QTextStream>
+#include <QSettings>
+#include <QDebug>
 
 #include <iostream>
 
 //Main window constructor
+
 //Main menu
 MainWindow::MainWindow(QWidget *parent, int w, int h)
   : QMainWindow(parent)
 {
+  //settings file handler
+  settingsFileName = QApplication::applicationDirPath() + "/config.ini";
+
+  loadSettings();
+
   this->resize(w,h);
   this->setWindowTitle("GyroScope");
   this->setContextMenuPolicy(Qt::NoContextMenu);
@@ -22,6 +30,19 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   createMenus();
   createToolBars();
 
+}
+
+void MainWindow::loadSettings()
+{
+  QSettings settings(settingsFileName, QSettings::IniFormat);
+  portName      = settings.value("portName", "").toString();
+  portLocation  = settings.value("portLocation", "").toString();
+}
+
+void MainWindow::saveSettings(){
+  QSettings settings(settingsFileName, QSettings::IniFormat);
+  settings.value("portName", portName);
+  settings.value("portLocation", portLocation);
 }
 
 void MainWindow::createActions(){
@@ -44,6 +65,7 @@ void MainWindow::createMenus(){
   //  Params
   paramsMenu = menuBar()->addMenu(tr("&Parameters"));
 
+
   //port settings
   QList<QSerialPortInfo> list;
   list = QSerialPortInfo::availablePorts();
@@ -55,19 +77,31 @@ void MainWindow::createMenus(){
     }
 
   foreach(QSerialPortInfo info, list){
-      portMenu->addMenu(info.portName());
-      QTextStream(stdout) << info.portName()
-                          << "\r\n"
-                          << info.description()
-                          << "\r\n"
-                          << info.manufacturer()
-                          << "\r\n"
-                          << info.systemLocation()
-                          << "\r\n"
-                          << info.vendorIdentifier()
-                          << "\r\n"
-                          <<info.productIdentifier()
-                          << "------";
+      QAction * action = new QAction(info.portName(), this);
+      action->setCheckable(true);
+      action->setChecked(false);
+
+      action->setData(info.systemLocation());
+
+      portMenu->addAction(action);
+      connect(portMenu, SIGNAL(triggered(QAction *)), this, SLOT(portMenuActionTriggered(QAction *)));
+
+      ////      dynamic creation of ports list
+      //      portMenu->addMenu(info.portName());
+      //      QTextStream(stdout) << info.portName()
+      //                          << "\r\n"
+      //                          << info.description()
+      //                          << "\r\n"
+      //                          << info.manufacturer()
+      //                          << "\r\n"
+      //                          << info.systemLocation()
+      //                          << "\r\n"
+      //                          << info.vendorIdentifier()
+      //                          << "\r\n"
+      //                          << info.productIdentifier()
+      //                          << "\r\n"
+      //                          << "------"
+      //                          << "\r\n";
     }
 
 
@@ -87,8 +121,15 @@ void MainWindow::createToolBars(){
   fileToolBar->addAction(disconnectAct);
 }
 
+void MainWindow::portMenuActionTriggered(QAction * action){
+  QVariant portLocation = action->data();
+  QSettings settings(settingsFileName, QSettings::IniFormat);
+  settings.setValue("portLocation", portLocation.toString());
+  settings.sync();
+ }
+
 MainWindow::~MainWindow()
 {
-//  delete ui;
+  //  delete ui;
 }
 
