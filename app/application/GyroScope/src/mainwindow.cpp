@@ -61,7 +61,6 @@ void MainWindow::createActions(){
         }
       disconnectAct->setDisabled(true);
     }
-
 }
 
 //  create menu bar
@@ -149,6 +148,9 @@ void MainWindow::portMenuActionTriggered(QAction * action){
   QSettings settings(settingsFileName, QSettings::IniFormat);
   settings.setValue("portLocation", portLocation.toString());
   settings.sync();
+
+  connectAct->setEnabled(true);
+  statusBar()->showMessage("Port selected");
  }
 
 MainWindow::~MainWindow()
