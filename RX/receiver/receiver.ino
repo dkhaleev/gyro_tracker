@@ -45,7 +45,7 @@ void setup() {
   radio.openReadingPipe(1, addresses[0]);     // Open a reading pipe on address 0, pipe 1
   radio.startListening();                 // Start listening
   radio.powerUp();
-  radio.printDetails();                   // Dump the configuration of the rf unit for debugging
+//  radio.printDetails();                   // Dump the configuration of the rf unit for debugging
   radio.setPALevel (RF24_PA_HIGH);         //Can be RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
   radio.setDataRate (RF24_1MBPS);
 }
@@ -64,32 +64,34 @@ void loop() {
 
 //    printf("Got Packet %ld with time %ld \r\n", payback.packet_id, payback.core_time);
  //Time section
+ Serial.print(payload.counter);
+ Serial.print("\t");
  Serial.print(payload.packet_id);
  Serial.print("\t");
  Serial.print(payload.core_time);
  Serial.print("\t");
- //Accelerometer debug section
+// //Accelerometer debug section
  Serial.print(payload.ax, DEC);
  Serial.print("\t");
  Serial.print(payload.ay, DEC);
  Serial.print("\t");
- Serial.print(payload.az, DEC);
- Serial.print("\t");
- //Gyroscope section
- Serial.print(payload.gx, DEC);
- Serial.print("\t");
- Serial.print(payload.gy, DEC);
- Serial.print("\t");
- Serial.print(payload.gz, DEC);
- Serial.print("\t");
- //Magnetometer section
-Serial.print (payload.mx+200,DEC);
-Serial.print ("\t");
-Serial.print (payload.my-70,DEC);
-Serial.print ("\t");
-Serial.print (payload.mz-700,DEC);
-Serial.print ("\t");
- Serial.print("\r\n");
+// Serial.print(payload.az, DEC);
+// Serial.print("\t");
+// //Gyroscope section
+// Serial.print(payload.gx, DEC);
+// Serial.print("\t");
+// Serial.print(payload.gy, DEC);
+// Serial.print("\t");
+// Serial.print(payload.gz, DEC);
+// Serial.print("\t");
+// //Magnetometer section
+//Serial.print (payload.mx+200,DEC);
+//Serial.print ("\t");
+//Serial.print (payload.my-70,DEC);
+//Serial.print ("\t");
+//Serial.print (payload.mz-700,DEC);
+//Serial.print ("\t");
+Serial.println("");
  
     radio.writeAckPayload(pipeNo, &payload, sizeof(Payload));
 //    printf("Sent response packet %ld with time %ld \r\n", payback.packet_id, payback.core_time);

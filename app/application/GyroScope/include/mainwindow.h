@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <rOc_timer.h>
+#include <rOc_serial.h>
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -21,6 +23,14 @@ private:
 
 private slots:
   void portMenuActionTriggered(QAction * action);
+  bool connectDevice();
+  bool disconnectDevice();
+
+  //input stream reader
+  void onTimerReadData();
+
+  //main dispatcher. Replace by signals structure later
+  void stateWasModified();
 
 private:
   void createActions();
@@ -49,6 +59,10 @@ private:
   QString portName;
   QString portLocation;
   bool isConnected = false;
+
+  //serial device
+  rOc_serial mpu9250;
+
 };
 
 typedef struct _portConfig{

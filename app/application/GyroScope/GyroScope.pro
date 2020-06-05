@@ -26,10 +26,14 @@ TEMPLATE =      app
 
 SOURCES += \
 	src/main.cpp \
-	src/mainwindow.cpp
+        src/mainwindow.cpp \
+        src/rOc_serial.cpp \
+        src/rOc_timer.cpp
 
 HEADERS += \
-    include/mainwindow.h
+    include/mainwindow.h \
+    include/rOc_serial.h \
+    include/rOc_timer.h
 
 FORMS += \
     ui/mainwindow.ui
