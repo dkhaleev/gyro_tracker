@@ -75,22 +75,22 @@ void loop() {
  Serial.print("\t");
  Serial.print(payload.ay, DEC);
  Serial.print("\t");
-// Serial.print(payload.az, DEC);
-// Serial.print("\t");
-// //Gyroscope section
-// Serial.print(payload.gx, DEC);
-// Serial.print("\t");
-// Serial.print(payload.gy, DEC);
-// Serial.print("\t");
-// Serial.print(payload.gz, DEC);
-// Serial.print("\t");
-// //Magnetometer section
-//Serial.print (payload.mx+200,DEC);
-//Serial.print ("\t");
-//Serial.print (payload.my-70,DEC);
-//Serial.print ("\t");
-//Serial.print (payload.mz-700,DEC);
-//Serial.print ("\t");
+ Serial.print(payload.az, DEC);
+ Serial.print("\t");
+//// //Gyroscope section
+ Serial.print(payload.gx, DEC);
+ Serial.print("\t");
+ Serial.print(payload.gy, DEC);
+ Serial.print("\t");
+ Serial.print(payload.gz, DEC);
+ Serial.print("\t");
+ //Magnetometer section
+Serial.print (payload.mx+200,DEC);
+Serial.print ("\t");
+Serial.print (payload.my-70,DEC);
+Serial.print ("\t");
+Serial.print (payload.mz-700,DEC);
+Serial.print ("\t");
 Serial.println("");
  
     radio.writeAckPayload(pipeNo, &payload, sizeof(Payload));

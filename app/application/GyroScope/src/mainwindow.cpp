@@ -178,68 +178,41 @@ void MainWindow::onTimerReadData(){
         {
           //Read block
           char buffer[200];
-          mpu9250.readString(buffer, '\n', 200, 10);
-
-
-//          struct Payload {
-//            long int counter = 0;         //system counter
-//            unsigned long packet_id = 0;  //packet ID
-//            unsigned long core_time = 0;  //sensor unit core time
-//            int16_t ax = 0;               //acceleration by X axis
-//            int16_t ay = 0;               //acceleration by Y axis
-//            int16_t az = 0;               //acceleration by Z axis
-//            int16_t gx = 0;               //orientation by X axis
-//            int16_t gy = 0;               //orientation by Y axis
-//            int16_t gz = 0;               //orientation by Z axis
-//            int16_t mx = 0;               //magnetic inclination by X axis
-//            int16_t my = 0;               //magnetic inclination by Y axis
-//            int16_t mz = 0;               //magnetic inclination by Z axis
-//          };
+         int read = mpu9250.readString(buffer, '\n', 200, 0);
 
           // Parse raw data
-          long int counter;
-          unsigned long packet_id;
-          unsigned long core_time;
+          long int counter = 0;
+          unsigned long packet_id = 0;
+          unsigned long core_time = 0;
 
-          int16_t  iax, iay;
+          int16_t  iax, iay, iaz = 0;
+          int16_t  igx, igy, igz = 0;
+          int16_t  imx, imy, imz = 0;
 
-          sscanf(buffer, "%lu %lu %lu %hu %hu",
+          sscanf(buffer, "%lu %lu %lu %hu %hu %hu %hu %hu %hu %hu %hu %hu",
                  &counter,
                  &packet_id,
                  &core_time,
                  &iax,
-                 &iay);
-////          int  it;
+                 &iay,
+                 &iaz,
+                 &igx,
+                 &igy,
+                 &igz,
+                 &imx,
+                 &imy,
+                 &imz
+                 );
 
-//          ,iay,iaz;
-//          int16_t  igx,igy,igz;
-//          int16_t  imx,imy,imz;
-//          sscanf (buffer,"%lu %lu %lu %hu %hu %hu %hu %hu %hu %hu %hu %hu",
-//                  &counter,
-//                  &packet_id,
-//                  &core_time,
-//                  &iax,
-//                  &iay,
-//                  &iaz,
-//                  &igx,
-//                  &igy,
-//                  &igz,
-//                  &imx,
-//                  &imy,
-//                  &imz);
-
-//          sscanf(buffer, "%lu %lu", &counter, &packet_id);
 //          // Display raw data
           std::cout << counter << "\t";
           std::cout << packet_id << "\t";
           std::cout << core_time << "\t";
-          std::cout << iax << "\t";
-          std::cout << iay << "\t";
-//          std::cout << iaz << "\t";
-//          std::cout << iax << "\t" << iay << "\t" << iaz << "\t";
-//          std::cout << igx << "\t" << igy << "\t" << igz << "\t";
-//          std::cout << imx << "\t" << imy << "\t" << imz << "\t";
-//          std::cout << "\r\n";
+
+          std::cout << iax << "\t" << iay << "\t" << iaz << "\t";
+          std::cout << igx << "\t" << igy << "\t" << igz << "\t";
+          std::cout << imx << "\t" << imy << "\t" << imz << "\t";
+          std::cout << "\r\n";
           std::cout << std::endl;
 
         }
@@ -255,11 +228,6 @@ void MainWindow::stateWasModified(){
   QTextStream(stdout)
       << "State was modified "
       << "\r\n"
-//      << "Port location "
-//      << portLocation
-//      << "\r\n"
-//      << "Port Name"
-//      << portName
       ;
 
   if(isConnected){

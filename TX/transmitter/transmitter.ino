@@ -100,12 +100,12 @@ void setup()
   radio.openWritingPipe(addresses[0]);        // Both radios listen on the same pipes by default, and switch when writing
   radio.openReadingPipe(1, addresses[1]);     // Open a reading pipe on address 0, pipe 1
   radio.stopListening();
-  radio.printDetails();                       // Dump the configuration of the rf unit for debugging
+//  radio.printDetails();                       // Dump the configuration of the rf unit for debugging
   radio.setPALevel (RF24_PA_HIGH);             // Can be RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
   radio.setDataRate (RF24_1MBPS);
 
   int dataSize = sizeof(Payload);
-  printf("Size of Payload %d\n", dataSize);
+
   if (dataSize > 32) {
     printf("!!!*** === Payload size exceeds 32 Bytes === ***!!! \n");
   }
@@ -157,8 +157,8 @@ void loop()
   // ::: Counter :::
   cpt++;
   // Display data counter
-//    Serial.print (payload.counter,DEC);
-//    Serial.print ("\t");
+    Serial.print (payload.counter,DEC);
+    Serial.print ("\t");
 
 
   // Display time
@@ -271,7 +271,7 @@ void loop()
     }
   } else {
     failed_packages++;
-    printf("Failed packages %d \r\n", failed_packages);
+//    printf("Failed packages %d \r\n", failed_packages);
   }
   radio.powerDown();
 
@@ -280,7 +280,7 @@ void loop()
   // End of line
   //  Serial.println("");
   //debug delay
-  delay(500);
+//  delay(500);
 }
 
 
