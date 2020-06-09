@@ -149,6 +149,8 @@ bool MainWindow::connectDevice(){
 
 bool MainWindow::disconnectDevice(){
   QTextStream(stdout) << "Disconnect Action called " << portLocation << " \r\n";
+  mpu9250.closeDevice();
+  isConnected = false;
   stateWasModified();
   return false;
 }
@@ -178,7 +180,7 @@ void MainWindow::onTimerReadData(){
         {
           //Read block
           char buffer[200];
-         int read = mpu9250.readString(buffer, '\n', 200, 0);
+          mpu9250.readString(buffer, '\n', 200, 0);
 
           // Parse raw data
           long int counter = 0;
@@ -236,6 +238,8 @@ void MainWindow::stateWasModified(){
     }else{
       if(portLocation == ""){
           connectAct->setDisabled(true);
+        } else {
+          connectAct->setDisabled(false);
         }
       disconnectAct->setDisabled(true);
     }
