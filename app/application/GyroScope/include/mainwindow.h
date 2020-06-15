@@ -36,7 +36,9 @@ private:
   void createActions();
   void createMenus();
   void createToolBars();
+  void createTabs();
   void createStatusBar();
+
 
   void loadSettings();
   void saveSettings();
@@ -52,6 +54,10 @@ private:
 
   QAction *connectAct;
   QAction *disconnectAct;
+
+  QWidget generalTabWidget;
+  QTabWidget *tabWidget;
+
 
   QString settingsFileName;
 

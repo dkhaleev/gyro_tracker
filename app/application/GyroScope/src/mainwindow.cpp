@@ -29,8 +29,23 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   createActions();
   createMenus();
   createToolBars();
+
   createStatusBar();
   stateWasModified();
+
+  QWidget *centralWidget = new QWidget(this);
+
+  QTabWidget *tabs = new QTabWidget(centralWidget);
+
+//      tabs->setFixedSize(245, 245);
+  tabs->addTab(new QWidget(), tr("General"));
+  tabs->addTab(new QWidget(), tr("Graph"));
+  tabs->addTab(new QWidget(), tr("Console"));
+  this->setCentralWidget(centralWidget);
+
+  QVBoxLayout *mainLayout = new QVBoxLayout;
+  mainLayout->addWidget(tabs);
+  setLayout(mainLayout);
 
   // Timer for reading raw data (every 10ms)
   QTimer *timerArduino = new QTimer();
@@ -119,6 +134,7 @@ void MainWindow::createToolBars(){
   fileToolBar->addAction(disconnectAct);
 }
 
+
 //Status Bar
 void MainWindow::createStatusBar(){
   if(isConnected){
@@ -131,7 +147,7 @@ void MainWindow::createStatusBar(){
 bool MainWindow::connectDevice(){
   QTextStream(stdout) << "Connect Action " << portLocation << "\r\n";
 
-  if(mpu9250.openDevice(portLocation.toLocal8Bit().data(), 9600)!=1){
+  if(mpu9250.openDevice(portLocation.toLocal8Bit().data(), 115200)!=1){
       std::cerr << "Error while opening serial device" << std::endl;
       isConnected = false;
       stateWasModified();
@@ -235,12 +251,14 @@ void MainWindow::stateWasModified(){
   if(isConnected){
       connectAct->setDisabled(true);
       disconnectAct->setDisabled(false);
+      statusBar()->showMessage("connected");
     }else{
       if(portLocation == ""){
           connectAct->setDisabled(true);
         } else {
           connectAct->setDisabled(false);
         }
+      statusBar()->showMessage("disconnected");
       disconnectAct->setDisabled(true);
     }
 }
