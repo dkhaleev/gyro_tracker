@@ -3,6 +3,7 @@
 
 #include <rOc_timer.h>
 #include <rOc_serial.h>
+#include "generalTab.h"
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE

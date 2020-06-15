@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QComboBox>
 #include <QtWidgets>
 #include <QWidgetAction>
 #include <QtSerialPort/QSerialPortInfo>
@@ -37,8 +36,8 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
 
   QTabWidget *tabs = new QTabWidget(centralWidget);
 
-//      tabs->setFixedSize(245, 245);
-  tabs->addTab(new QWidget(), tr("General"));
+  tabs->setMinimumSize(this->size());
+  tabs->addTab(new GeneralTab("simple text"), tr("General"));
   tabs->addTab(new QWidget(), tr("Graph"));
   tabs->addTab(new QWidget(), tr("Console"));
   this->setCentralWidget(centralWidget);

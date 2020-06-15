@@ -1,13 +1,13 @@
 QT       += \
-	core \
-	gui \
-	opengl \
+        core \
+        gui \
+        opengl \
         serialport \
         widgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++11
+CONFIG += 	c++11
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -25,18 +25,20 @@ TARGET =        GyroScope
 TEMPLATE =      app
 
 SOURCES += \
-	src/main.cpp \
+        src/generalTab.cpp \
+        src/main.cpp \
         src/mainwindow.cpp \
         src/rOc_serial.cpp \
-        src/rOc_timer.cpp
+        src/rOc_timer.cpp 
 
 HEADERS += \
-    include/mainwindow.h \
-    include/rOc_serial.h \
-    include/rOc_timer.h
+        include/generalTab.h \
+        include/mainwindow.h \
+        include/rOc_serial.h \
+        include/rOc_timer.h
 
 FORMS += \
-    ui/mainwindow.ui
+        ui/mainwindow.ui
 	
 INCLUDEPATH += \
 	src \
@@ -51,3 +53,17 @@ DESTDIR = bin/
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+static { # everything below takes effect with CONFIG ''= static
+ CONFIG+= static
+ CONFIG += staticlib # this is needed if you create a static library, not a static executable
+ DEFINES+= STATIC
+ message("~~~ static build ~~~") # this is for information, that the static build is done
+ mac: TARGET = $$join(TARGET,,,_static) #this adds an _static in the end, so you can seperate static build
+}
+
+# change the nama of the binary, if it is build in debug mode
+CONFIG (debug, debug|release) {
+ mac: TARGET = $$join(TARGET,,,_debug)
+ win32: TARGET = $$join(TARGET,,,d)
+}
