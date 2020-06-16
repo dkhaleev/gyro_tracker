@@ -4,13 +4,18 @@
 #include <rOc_timer.h>
 #include <rOc_serial.h>
 #include "generalTab.h"
+#include "graphTab.h"
+#include "consoleTab.h"
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
 
 class QAction;
 class QMenu;
+
 QT_END_NAMESPACE
+
+class Console;
 
 class MainWindow : public QMainWindow
 {
@@ -33,6 +38,9 @@ private slots:
   //main dispatcher. Replace by signals structure later
   void stateWasModified();
 
+protected:
+  void resizeEvent(QResizeEvent *);
+
 private:
   void createActions();
   void createMenus();
@@ -51,6 +59,8 @@ private:
   QMenu *baudrateMenu;
   QMenu *aboutMenu;
 
+  QTabWidget *tabs;
+
   QToolBar *fileToolBar;
 
   QAction *connectAct;
@@ -59,8 +69,9 @@ private:
   QWidget generalTabWidget;
   QTabWidget *tabWidget;
 
-
   QString settingsFileName;
+
+  Console *console;
 
   //global port variables;
   QString portName;

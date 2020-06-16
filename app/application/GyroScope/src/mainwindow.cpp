@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+//#include "console.h"
 #include <QtWidgets>
 #include <QWidgetAction>
 #include <QtSerialPort/QSerialPortInfo>
@@ -34,12 +35,17 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
 
   QWidget *centralWidget = new QWidget(this);
 
-  QTabWidget *tabs = new QTabWidget(centralWidget);
+//  console routine
+  console = new Console;
+  console->setEnabled(false);
+
+//  tabs routine
+  tabs = new QTabWidget(centralWidget);
 
   tabs->setMinimumSize(this->size());
-  tabs->addTab(new GeneralTab("simple text"), tr("General"));
-  tabs->addTab(new QWidget(), tr("Graph"));
-  tabs->addTab(new QWidget(), tr("Console"));
+//  tabs->addTab(new GeneralTab("simple text"), tr("General"));
+//  tabs->addTab(new GraphTab("simple text"), tr("Graph"));
+  tabs->addTab(new ConsoleTab(*console), tr("Console"));
   this->setCentralWidget(centralWidget);
 
   QVBoxLayout *mainLayout = new QVBoxLayout;
@@ -50,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   QTimer *timerArduino = new QTimer();
   timerArduino->connect(timerArduino, SIGNAL(timeout()),this, SLOT(onTimerReadData()));
   timerArduino->start(10);
+//  connect(console, SIGNAL(getData(QByteArray)), this, SLOT(writeData(QByteArray)));
 }
 
 void MainWindow::loadSettings()
@@ -133,7 +140,10 @@ void MainWindow::createToolBars(){
   fileToolBar->addAction(disconnectAct);
 }
 
+void MainWindow::resizeEvent(QResizeEvent *){
+  tabs->setMinimumSize(centralWidget()->size());
 
+}
 //Status Bar
 void MainWindow::createStatusBar(){
   if(isConnected){
@@ -222,16 +232,19 @@ void MainWindow::onTimerReadData(){
                  );
 
 //          // Display raw data
-          std::cout << counter << "\t";
-          std::cout << packet_id << "\t";
-          std::cout << core_time << "\t";
+//          std::cout << counter << "\t";
+//          std::cout << packet_id << "\t";
+//          std::cout << core_time << "\t";
 
-          std::cout << iax << "\t" << iay << "\t" << iaz << "\t";
-          std::cout << igx << "\t" << igy << "\t" << igz << "\t";
-          std::cout << imx << "\t" << imy << "\t" << imz << "\t";
-          std::cout << "\r\n";
-          std::cout << std::endl;
+//          std::cout << iax << "\t" << iay << "\t" << iaz << "\t";
+//          std::cout << igx << "\t" << igy << "\t" << igz << "\t";
+//          std::cout << imx << "\t" << imy << "\t" << imz << "\t";
+//          std::cout << "\r\n";
+//          std::cout << std::endl;
 
+//          assemly data for meta-console
+          QByteArray data = buffer;
+          console->putData(data);
         }
     }else{
       QTextStream(stdout)

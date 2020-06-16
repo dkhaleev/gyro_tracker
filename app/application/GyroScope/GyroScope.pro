@@ -25,17 +25,24 @@ TARGET =        GyroScope
 TEMPLATE =      app
 
 SOURCES += \
+        src/console.cpp \
+        src/consoleTab.cpp \
         src/generalTab.cpp \
+        src/graphTab.cpp \
         src/main.cpp \
         src/mainwindow.cpp \
         src/rOc_serial.cpp \
         src/rOc_timer.cpp 
 
 HEADERS += \
+        include/console.h \
+        include/consoleTab.h \
         include/generalTab.h \
+        include/graphTab.h \
         include/mainwindow.h \
         include/rOc_serial.h \
-        include/rOc_timer.h
+        include/rOc_timer.h \
+        include/consoleTab.h
 
 FORMS += \
         ui/mainwindow.ui
