@@ -16,6 +16,7 @@ class QMenu;
 QT_END_NAMESPACE
 
 class Console;
+class Graph;
 
 class MainWindow : public QMainWindow
 {
@@ -72,6 +73,7 @@ private:
   QString settingsFileName;
 
   Console *console;
+  Graph *graph;
 
   //global port variables;
   QString portName;

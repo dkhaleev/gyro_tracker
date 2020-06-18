@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-//#include "console.h"
 #include <QtWidgets>
 #include <QWidgetAction>
 #include <QtSerialPort/QSerialPortInfo>
@@ -39,12 +38,14 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   console = new Console;
   console->setEnabled(false);
 
+  graph = new Graph;
+
 //  tabs routine
   tabs = new QTabWidget(centralWidget);
 
   tabs->setMinimumSize(this->size());
 //  tabs->addTab(new GeneralTab("simple text"), tr("General"));
-//  tabs->addTab(new GraphTab("simple text"), tr("Graph"));
+  tabs->addTab(new GraphTab(*graph), tr("Graph"));
   tabs->addTab(new ConsoleTab(*console), tr("Console"));
   this->setCentralWidget(centralWidget);
 
@@ -245,6 +246,7 @@ void MainWindow::onTimerReadData(){
 //          assemly data for meta-console
           QByteArray data = buffer;
           console->putData(data);
+          graph->dispatchData(data);
         }
     }else{
       QTextStream(stdout)

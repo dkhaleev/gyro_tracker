@@ -2,6 +2,7 @@
 #define GRAPHTAB_H
 
 #include <QDialog>
+#include "graph.h"
 
 QT_BEGIN_NAMESPACE
 class QDialogButtonBox;
@@ -13,8 +14,10 @@ class GraphTab : public QWidget {
   Q_OBJECT
 
 public:
-  explicit GraphTab(const QString &text, QWidget *parent = 0);
+  explicit GraphTab(Graph &graph, QWidget *parent = 0);
 
+private:
+  Graph *graph;
 };
 
 #endif // GRAPHTAB_H

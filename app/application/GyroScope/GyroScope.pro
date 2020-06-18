@@ -28,6 +28,7 @@ SOURCES += \
         src/console.cpp \
         src/consoleTab.cpp \
         src/generalTab.cpp \
+        src/graph.cpp \
         src/graphTab.cpp \
         src/main.cpp \
         src/mainwindow.cpp \
@@ -38,6 +39,7 @@ HEADERS += \
         include/console.h \
         include/consoleTab.h \
         include/generalTab.h \
+        include/graph.h \
         include/graphTab.h \
         include/mainwindow.h \
         include/rOc_serial.h \
