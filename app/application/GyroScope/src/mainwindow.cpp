@@ -245,6 +245,7 @@ void MainWindow::onTimerReadData(){
 
 //          assemly data for meta-console
           QByteArray data = buffer;
+
           console->putData(data);
           graph->dispatchData(data);
         }
