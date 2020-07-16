@@ -47,11 +47,12 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
 //  tabs->addTab(new GeneralTab("simple text"), tr("General"));
   tabs->addTab(new GraphTab(*graph), tr("Graph"));
   tabs->addTab(new ConsoleTab(*console), tr("Console"));
+//  tabs->show();
   this->setCentralWidget(centralWidget);
 
-  QVBoxLayout *mainLayout = new QVBoxLayout;
-  mainLayout->addWidget(tabs);
-  setLayout(mainLayout);
+//   QVBoxLayout *mainLayout = new QVBoxLayout;
+//   mainLayout->addWidget(tabs);
+//   setLayout(mainLayout);
 
   // Timer for reading raw data (every 10ms)
   QTimer *timerArduino = new QTimer();
@@ -250,10 +251,10 @@ void MainWindow::onTimerReadData(){
           graph->dispatchData(data);
         }
     }else{
-      QTextStream(stdout)
-          << "Not Connected"
-          << "\r\n"
-             ;
+//      QTextStream(stdout)
+//          << "Not Connected"
+//          << "\r\n"
+//             ;
     }
 }
 
