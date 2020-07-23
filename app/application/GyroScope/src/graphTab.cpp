@@ -10,9 +10,10 @@ GraphTab::GraphTab(Graph &graph, QWidget *parent) : QWidget(parent)
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addWidget(graphLabel);
 //  &graph.setFixedHeight(200);
+  graph.setMinimumSize(300,300);
   mainLayout->addWidget(&graph);
-
-  mainLayout->addStretch(1);
+//  this->setMinimumSize(300,300);
+//  mainLayout->addStretch(1);
   setLayout(mainLayout);
   this->show();
 }

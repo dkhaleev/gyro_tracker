@@ -3,7 +3,8 @@ QT       += \
         gui \
         opengl \
         serialport \
-        widgets
+        widgets \
+        printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -33,8 +34,9 @@ SOURCES += \
         src/graphTab.cpp \
         src/main.cpp \
         src/mainwindow.cpp \
+        src/qcustomplot.cpp \
         src/rOc_serial.cpp \
-        src/rOc_timer.cpp 
+        src/rOc_timer.cpp
 
 HEADERS += \
         include/console.h \
@@ -43,6 +45,7 @@ HEADERS += \
         include/graph.h \
         include/graphTab.h \
         include/mainwindow.h \
+        include/qcustomplot.h \
         include/rOc_serial.h \
         include/rOc_timer.h \
         include/consoleTab.h

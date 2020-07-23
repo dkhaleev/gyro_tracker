@@ -10,6 +10,7 @@
 #include <qpainter.h>
 #include <qapplication.h>
 #include <qframe.h>
+#include <qcustomplot.h>
 
 class Graph : public QFrame
 {
@@ -26,13 +27,28 @@ public:
 
   void dispatchMagnetometer(const QByteArray &data);
 
-protected:
-    virtual void paintEvent( QPaintEvent * );
-    void drawContents( QPainter *p );
+private slots:
+    // This function is responsible for ploting
+    // and updating the graphs , with each timer tick
+    void updatePlot();
 
 private:
-    void shiftDown( QRect &rect, int offset ) const;
-    QwtPlotCurve curve;
+//    Ui::MainWindow *ui;
+    // Our custom plot widget
+    QCustomPlot * m_CustomPlot;
+    // This object will hold the current value as a text
+    // that will appear at the extreme right of the plot,
+    QCPItemText *m_ValueIndex;
+
+    // The time between each update, this
+    // will be  used by the timer to call "updatePlot" slot
+    qreal timeInterval;
+
+    // Data buffers
+    QVector<qreal> m_YData;
+    QVector<qreal> m_XData;
+
+
 };
 
 #endif // GRAPH_H
