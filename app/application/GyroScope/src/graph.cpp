@@ -87,9 +87,9 @@ Graph::Graph(QWidget *parent):
 
 
   // setup a timer and start it.
-  QTimer *timer = new QTimer(this);
-  connect(timer, SIGNAL( timeout() ), this, SLOT( updatePlot() ) );
-  timer->start( timeInterval );
+//  QTimer *timer = new QTimer(this);
+//  connect(timer, SIGNAL( timeout() ), this, SLOT( updatePlot() ) );
+//  timer->start( timeInterval );
   m_CustomPlot->setMinimumSize(this->minimumWidth(), 200);
 
   this->setFixedHeight(200);
@@ -201,9 +201,70 @@ void Graph::dispatchData(const QByteArray &data){
 
       QTextStream(stdout) << printf("Graph dispatch index [%lu] \r\n", packet_id);
 
-     dispatchAccelerometer();
+     dispatchAccelerometer(core_time, iax, iay, iaz);
 }
 
-void Graph::dispatchAccelerometer(){
+void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz){
+  //stuff X-axis data storage
+  m_XData.append(core_time);
+  //stuff X-axis data storage for accelerometer X-axis
+  m_YData.append(iax);
+
+  //add the data to the graph
+  m_CustomPlot->graph(0)->setData(m_XData, m_YData);
+
+  // Set the range of the vertical and horizontal axis of the plot ( not the graph )
+  // so all the data will be centered. first we get the min and max of the x and y data
+  QVector<double>::iterator xMaxIt = std::max_element( m_XData.begin() , m_XData.end() );
+  QVector<double>::iterator xMinIt = std::min_element( m_XData.begin() , m_XData.end() );
+  QVector<double>::iterator yMaxIt = std::max_element( m_YData.begin() , m_YData.end() );
+
+
+  qreal yPlotMin = 0;
+  qreal yPlotMax = *yMaxIt;
+
+  qreal xPlotMin = *xMinIt;
+  qreal xPlotMax = *xMaxIt;
+
+  // The yOffset just to make sure that the graph won't take the whole
+  // space in the plot widget, and to keep a margin at the top, the same goes for xOffset
+  qreal yOffset = 0.3 * ( yPlotMax - yPlotMin ) ;
+  qreal xOffset = 0.5 *( xPlotMax - xPlotMin );
+  m_CustomPlot->xAxis->setRange( xPlotMin , xPlotMax + xOffset );
+  m_CustomPlot->yAxis->setRange(yPlotMin , yPlotMax + yOffset);
+  //************************************************************//
+  // Generate the data for the horizontal line, that changes with
+  // the last value of the main graph
+  QVector<double> tmpYYData;
+  QVector<double> tmpXXData;
+  // Since it's a horizontal line, we only need to feed it two points
+  // and both points have the y value
+  tmpYYData.append( m_YData.last() );
+  tmpYYData.append( m_YData.last() );
+
+  // To make the line cross the plot widget horizontally,
+  // from extreme left to extreme right
+  tmpXXData.append( m_XData.first() );
+  tmpXXData.append( m_XData.last() + xOffset );
+  // Finaly set the horizental line data
+  m_CustomPlot->graph( 1 )->setData( tmpXXData , tmpYYData );
+//************************************************************//
+  // Now to the text item that displays the current value
+  // as a string.
+  // These are the coordinates of the text item,
+  // the offsets here are just to make the text appear
+  // next and above a the horizontal line.
+  qreal indexX = m_XData.last() + 0.5 * xOffset;
+  qreal indexY = m_YData.last() + 0.2 * yOffset;
+
+  // Set the coordinate that we calculated
+  m_ValueIndex->position->setCoords( indexX , indexY );
+  // Set the text that we want to display
+  m_ValueIndex->setText(  QString::number( tmpYYData.last() ) + "  MB/s" );
+
+
+  // Update the plot widget
+  m_CustomPlot->replot();
+
 
 }

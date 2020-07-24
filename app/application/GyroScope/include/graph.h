@@ -21,7 +21,7 @@ public:
 
   void dispatchData(const QByteArray &data);
 
-  void dispatchAccelerometer();
+  void dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz);
 
   void dispatchGyroscope(const QByteArray &data);
 
