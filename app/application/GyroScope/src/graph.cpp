@@ -225,20 +225,26 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   QVector<double>::iterator xMaxIt = std::max_element( m_XData.begin() , m_XData.end() );
   QVector<double>::iterator xMinIt = std::min_element( m_XData.begin() , m_XData.end() );
   QVector<double>::iterator yMaxIt = std::max_element( m_YData.begin() , m_YData.end() );
+  QVector<double>::iterator yMinIt = std::min_element( m_YData.begin() , m_YData.end() );
 
-
-  qreal yPlotMin = 0;
+  qreal yPlotMin = *yMinIt;
   qreal yPlotMax = *yMaxIt;
 
   qreal xPlotMin = *xMinIt;
   qreal xPlotMax = *xMaxIt;
 
+  //find maximum absolute value
+  qreal yMax = abs(yPlotMax);
+  if(yMax < abs(yPlotMin)){
+      yMax = abs(yPlotMin);
+    }
+
   // The yOffset just to make sure that the graph won't take the whole
   // space in the plot widget, and to keep a margin at the top, the same goes for xOffset
-  qreal yOffset = 0.3 * ( yPlotMax - yPlotMin ) ;
-  qreal xOffset = 0.5 *( xPlotMax - xPlotMin );
-  m_CustomPlot->xAxis->setRange( xPlotMin , xPlotMax + xOffset );
-  m_CustomPlot->yAxis->setRange(yPlotMin , yPlotMax + yOffset);
+  qreal yOffset = 0.3 * ( yMax) ;
+  qreal xOffset = 0;
+  m_CustomPlot->xAxis->setRange( xPlotMin , xPlotMax);
+  m_CustomPlot->yAxis->setRange(-(yMax+yOffset) , yMax + yOffset);
   //************************************************************//
   // Generate the data for the horizontal line, that changes with
   // the last value of the main graph
