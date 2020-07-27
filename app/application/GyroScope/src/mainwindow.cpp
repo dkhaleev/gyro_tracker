@@ -237,6 +237,7 @@ void MainWindow::onTimerReadData(){
 //          std::cout << counter << "\t";
 //          std::cout << packet_id << "\t";
 //          std::cout << core_time << "\t";
+//          std::cout << iax ;
 
 //          std::cout << iax << "\t" << iay << "\t" << iaz << "\t";
 //          std::cout << igx << "\t" << igy << "\t" << igz << "\t";

@@ -85,11 +85,6 @@ Graph::Graph(QWidget *parent):
   m_CustomPlot->graph( 0 )->setPen( QColor() );
   m_CustomPlot->graph( 1 )->setPen( QColor() );
 
-
-  // setup a timer and start it.
-//  QTimer *timer = new QTimer(this);
-//  connect(timer, SIGNAL( timeout() ), this, SLOT( updatePlot() ) );
-//  timer->start( timeInterval );
   m_CustomPlot->setMinimumSize(this->minimumWidth(), 200);
 
   this->setFixedHeight(200);
@@ -199,7 +194,7 @@ void Graph::dispatchData(const QByteArray &data){
          );
 
 
-      QTextStream(stdout) << printf("Graph dispatch index [%lu] \r\n", packet_id);
+//      QTextStream(stdout) << printf("Graph dispatch index [%lu] \r\n", packet_id);
 
      dispatchAccelerometer(core_time, iax, iay, iaz);
 }
@@ -207,8 +202,20 @@ void Graph::dispatchData(const QByteArray &data){
 void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz){
   //stuff X-axis data storage
   m_XData.append(core_time);
+
+  //shrink graph to size
+  if(m_XData.size() > 100){
+      m_XData.removeFirst();
+      if(!m_YData.empty()){
+          m_YData.removeFirst();
+        }
+    }
+
+//  argument type conversion
+  double d_iax = 1.0 * iax;
+
   //stuff X-axis data storage for accelerometer X-axis
-  m_YData.append(iax);
+  m_YData.append(d_iax);
 
   //add the data to the graph
   m_CustomPlot->graph(0)->setData(m_XData, m_YData);
@@ -260,7 +267,7 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   // Set the coordinate that we calculated
   m_ValueIndex->position->setCoords( indexX , indexY );
   // Set the text that we want to display
-  m_ValueIndex->setText(  QString::number( tmpYYData.last() ) + "  MB/s" );
+  m_ValueIndex->setText(  QString::number( tmpYYData.last() ) + "  M/C²" );
 
 
   // Update the plot widget
