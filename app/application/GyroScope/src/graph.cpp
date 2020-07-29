@@ -26,7 +26,6 @@
 //   Array Sizes
 //
 const int Size = 27;
-const int CurvCnt = 1;
 double xval[Size];
 double yval[Size];
 QwtScaleMap xMap;
@@ -56,10 +55,22 @@ Graph::Graph(QWidget *parent):
 //  setCentralWidget( m_CustomPlot ); // there is no need to add and promote a widget
 
 
-  // Add a graph to the plot widget ( the main graph )
+  // Add a graph to the plot widget ( the main accelerometer x-axis graph )
   m_CustomPlot->addGraph();
   // Add a graph to the plot widget ( this will be a horizontal line )
-  // that folows the current value of the main graph
+  // that folows the current value of the main x-axis graph
+  m_CustomPlot->addGraph();
+
+  // Add a graph to the plot widget ( the main accelerometer y-axis graph )
+  m_CustomPlot->addGraph();
+  // Add a graph to the plot widget ( this will be a horizontal line )
+  // that folows the current value of the main y-axis graph
+  m_CustomPlot->addGraph();
+
+  // Add a graph to the plot widget ( the main accelerometer z-axis graph )
+  m_CustomPlot->addGraph();
+  // Add a graph to the plot widget ( this will be a horizontal line )
+  // that folows the current value of the main z-axis graph
   m_CustomPlot->addGraph();
 
   // tell the plot widget to display the x axis values as a time
@@ -79,11 +90,25 @@ Graph::Graph(QWidget *parent):
   m_CustomPlot->addItem( m_ValueIndex );
 
   // Change the color of the graphs
-  QColor brushClr = Qt::green;
-  brushClr.setAlphaF( .5 );
-  m_CustomPlot->graph( 0 )->setBrush( brushClr );
+  QColor AXBrushClr = Qt::red;
+  QColor AYBrushClr = Qt::green;
+  QColor AZBrushClr = Qt::blue;
+
+  AXBrushClr.setAlphaF( .3 );
+  AYBrushClr.setAlphaF( .3 );
+  AZBrushClr.setAlphaF( .3 );
+
+  m_CustomPlot->graph( 0 )->setBrush( AXBrushClr );
   m_CustomPlot->graph( 0 )->setPen( QColor() );
   m_CustomPlot->graph( 1 )->setPen( QColor() );
+
+  m_CustomPlot->graph( 2 )->setBrush( AYBrushClr );
+  m_CustomPlot->graph( 2 )->setPen( QColor() );
+  m_CustomPlot->graph( 3 )->setPen( QColor() );
+
+  m_CustomPlot->graph( 4 )->setBrush( AZBrushClr );
+  m_CustomPlot->graph( 4 )->setPen( QColor() );
+  m_CustomPlot->graph( 5 )->setPen( QColor() );
 
   m_CustomPlot->setMinimumSize(this->minimumWidth(), 200);
 
@@ -108,17 +133,17 @@ void Graph::updatePlot()
     qreal r = static_cast<qreal>( rand() ) / RAND_MAX  ;
     // the next value will be 80 plus or minus 5
     qreal value = 80 + 5 * r;
-    m_YData.append( value );
+    m_YAXData.append( value );
 
     // Keep the data buffers size under 100 value each,
     // so our moemoty won't explode with random numbers
     if( m_XData.size() > 100 ){
         m_XData.remove( 0 );
-        m_YData.remove( 0 );
+        m_YAXData.remove( 0 );
     }
 
     // Add the data to the graph
-    m_CustomPlot->graph( 0 )->setData( m_XData , m_YData );
+    m_CustomPlot->graph( 0 )->setData( m_XData , m_YAXData );
     // Now this is the tricky part, the previous part
     // was easy and nothing new in it.
 
@@ -126,7 +151,7 @@ void Graph::updatePlot()
     // so all the data will be centered. first we get the min and max of the x and y data
     QVector<double>::iterator xMaxIt = std::max_element( m_XData.begin() , m_XData.end() );
     QVector<double>::iterator xMinIt = std::min_element( m_XData.begin() , m_XData.end() );
-    QVector<double>::iterator yMaxIt = std::max_element( m_YData.begin() , m_YData.end() );
+    QVector<double>::iterator yMaxIt = std::max_element( m_YAXData.begin() , m_YAXData.end() );
 
 
     qreal yPlotMin = 0;
@@ -148,8 +173,8 @@ void Graph::updatePlot()
     QVector<double> tmpXXData;
     // Since it's a horizontal line, we only need to feed it two points
     // and both points have the y value
-    tmpYYData.append( m_YData.last() );
-    tmpYYData.append( m_YData.last() );
+    tmpYYData.append( m_YAXData.last() );
+    tmpYYData.append( m_YAXData.last() );
 
     // To make the line cross the plot widget horizontally,
     // from extreme left to extreme right
@@ -164,7 +189,7 @@ void Graph::updatePlot()
     // the offsets here are just to make the text appear
     // next and above a the horizontal line.
     qreal indexX = m_XData.last() + 0.5 * xOffset;
-    qreal indexY = m_YData.last() + 0.2 * yOffset;
+    qreal indexY = m_YAXData.last() + 0.2 * yOffset;
 
     // Set the coordinate that we calculated
     m_ValueIndex->position->setCoords( indexX , indexY );
@@ -206,26 +231,44 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   //shrink graph to size
   if(m_XData.size() > 100){
       m_XData.removeFirst();
-      if(!m_YData.empty()){
-          m_YData.removeFirst();
+      //@todo: refactor me
+      //cleanup X-axis accel data
+      if(!m_YAXData.empty()){
+          m_YAXData.removeFirst();
+        }
+
+      //cleanup Y-axis accel data
+      if(!m_YAYData.empty()){
+          m_YAYData.removeFirst();
+        }
+
+      //cleanup Z-axis accel data
+      if(!m_YAZData.empty()){
+          m_YAZData.removeFirst();
         }
     }
 
 //  argument type conversion
   double d_iax = 1.0 * iax;
+  double d_iay = 1.0 * iay;
+  double d_iaz = 1.0 * iaz;
 
-  //stuff X-axis data storage for accelerometer X-axis
-  m_YData.append(d_iax);
+  //stuff X-axis data storage for accelerometer X,Y axis
+  m_YAXData.append(d_iax);
+  m_YAYData.append(d_iay);
+  m_YAZData.append(d_iaz);
 
-  //add the data to the graph
-  m_CustomPlot->graph(0)->setData(m_XData, m_YData);
+  //add the data to the x-axis accelerometer graph
+  m_CustomPlot->graph(0)->setData(m_XData, m_YAXData);
+  m_CustomPlot->graph(2)->setData(m_XData, m_YAYData);
+  m_CustomPlot->graph(4)->setData(m_XData, m_YAZData);
 
   // Set the range of the vertical and horizontal axis of the plot ( not the graph )
   // so all the data will be centered. first we get the min and max of the x and y data
   QVector<double>::iterator xMaxIt = std::max_element( m_XData.begin() , m_XData.end() );
   QVector<double>::iterator xMinIt = std::min_element( m_XData.begin() , m_XData.end() );
-  QVector<double>::iterator yMaxIt = std::max_element( m_YData.begin() , m_YData.end() );
-  QVector<double>::iterator yMinIt = std::min_element( m_YData.begin() , m_YData.end() );
+  QVector<double>::iterator yMaxIt = std::max_element( m_YAXData.begin() , m_YAXData.end() );
+  QVector<double>::iterator yMinIt = std::min_element( m_YAXData.begin() , m_YAXData.end() );
 
   qreal yPlotMin = *yMinIt;
   qreal yPlotMax = *yMaxIt;
@@ -234,16 +277,16 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   qreal xPlotMax = *xMaxIt;
 
   //find maximum absolute value
-  qreal yMax = abs(yPlotMax);
-  if(yMax < abs(yPlotMin)){
-      yMax = abs(yPlotMin);
+  qreal yMax = fabs(yPlotMax);
+  if(yMax < fabs(yPlotMin)){
+      yMax = fabs(yPlotMin);
     }
 
   // The yOffset just to make sure that the graph won't take the whole
   // space in the plot widget, and to keep a margin at the top, the same goes for xOffset
   qreal yOffset = 0.3 * ( yMax) ;
-  qreal xOffset = 0;
-  m_CustomPlot->xAxis->setRange( xPlotMin , xPlotMax);
+  qreal xOffset = 0.1 *( xPlotMax - xPlotMin );
+  m_CustomPlot->xAxis->setRange( xPlotMin , xPlotMax+xOffset);
   m_CustomPlot->yAxis->setRange(-(yMax+yOffset) , yMax + yOffset);
   //************************************************************//
   // Generate the data for the horizontal line, that changes with
@@ -252,8 +295,8 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   QVector<double> tmpXXData;
   // Since it's a horizontal line, we only need to feed it two points
   // and both points have the y value
-  tmpYYData.append( m_YData.last() );
-  tmpYYData.append( m_YData.last() );
+  tmpYYData.append( m_YAXData.last() );
+  tmpYYData.append( m_YAXData.last() );
 
   // To make the line cross the plot widget horizontally,
   // from extreme left to extreme right
@@ -268,7 +311,7 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   // the offsets here are just to make the text appear
   // next and above a the horizontal line.
   qreal indexX = m_XData.last() + 0.5 * xOffset;
-  qreal indexY = m_YData.last() + 0.2 * yOffset;
+  qreal indexY = m_YAXData.last() + 0.2 * yOffset;
 
   // Set the coordinate that we calculated
   m_ValueIndex->position->setCoords( indexX , indexY );

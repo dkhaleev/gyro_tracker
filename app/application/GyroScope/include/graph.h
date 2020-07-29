@@ -44,9 +44,11 @@ private:
     // will be  used by the timer to call "updatePlot" slot
     qreal timeInterval;
 
-    // Data buffers
-    QVector<qreal> m_YData;
-    QVector<qreal> m_XData;
+    // Data buffers    
+    QVector<qreal> m_XData;   //X-axis graph accelerometer Timeline data
+    QVector<qreal> m_YAXData; //Y-axis graph accelerometer X-axis data
+    QVector<qreal> m_YAYData; //Y-asis graph accelerometer Y-axis data
+    QVector<qreal> m_YAZData; //Y-axis graph acceleromete Z-axis data
 
 
 };
