@@ -38,7 +38,9 @@ private:
     QCustomPlot * m_CustomPlot;
     // This object will hold the current value as a text
     // that will appear at the extreme right of the plot,
-    QCPItemText *m_ValueIndex;
+    QCPItemText *m_ValueIndexX;
+    QCPItemText *m_ValueIndexY;
+    QCPItemText *m_ValueIndexZ;
 
     // The time between each update, this
     // will be  used by the timer to call "updatePlot" slot

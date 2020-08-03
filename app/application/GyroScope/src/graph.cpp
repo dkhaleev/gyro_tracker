@@ -83,11 +83,17 @@ Graph::Graph(QWidget *parent):
 
   // Allocating memory for the text item that will
   // display the current value as a text.
-  m_ValueIndex = new QCPItemText( m_CustomPlot );
+  m_ValueIndexX = new QCPItemText( m_CustomPlot );
+  m_ValueIndexY = new QCPItemText( m_CustomPlot );
+  m_ValueIndexZ = new QCPItemText( m_CustomPlot );
   // Set the font of the text item
-  m_ValueIndex->setFont(QFont(font().family(), 8)); // make font a bit larger
+  m_ValueIndexX->setFont(QFont(font().family(), 8)); // make font a bit larger
+  m_ValueIndexY->setFont(QFont(font().family(), 8)); // make font a bit larger
+  m_ValueIndexZ->setFont(QFont(font().family(), 8)); // make font a bit larger
   // Add the text item to the plt widget
-  m_CustomPlot->addItem( m_ValueIndex );
+  m_CustomPlot->addItem( m_ValueIndexX );
+  m_CustomPlot->addItem( m_ValueIndexY );
+  m_CustomPlot->addItem( m_ValueIndexZ );
 
   // Change the color of the graphs
   QColor AXBrushClr = Qt::red;
@@ -192,9 +198,9 @@ void Graph::updatePlot()
     qreal indexY = m_YAXData.last() + 0.2 * yOffset;
 
     // Set the coordinate that we calculated
-    m_ValueIndex->position->setCoords( indexX , indexY );
+    m_ValueIndexX->position->setCoords( indexX , indexY );
     // Set the text that we want to display
-    m_ValueIndex->setText(  QString::number( tmpYYData.last() ) + "  MB/s" );
+    m_ValueIndexX->setText(  QString::number( tmpYYData.last() ) + "  MB/s" );
 
 
     // Update the plot widget
@@ -253,10 +259,10 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   double d_iay = 1.0 * iay;
   double d_iaz = 1.0 * iaz;
 
-  //stuff X-axis data storage for accelerometer X,Y axis
-  m_YAXData.append(d_iax);
-  m_YAYData.append(d_iay);
-  m_YAZData.append(d_iaz);
+  //stuff X-axis data storage for accelerometer X,Y and Z axes
+  m_YAXData.append((d_iax/8192)*9.8); //  (data/ +/- accelerometer range)*9.8 m/s^2 -> value normalized to m/s^2
+  m_YAYData.append((d_iay/8192)*9.8);
+  m_YAZData.append((d_iaz/8192)*9.8);
 
   //add the data to the x-axis accelerometer graph
   m_CustomPlot->graph(0)->setData(m_XData, m_YAXData);
@@ -267,20 +273,27 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   // so all the data will be centered. first we get the min and max of the x and y data
   QVector<double>::iterator xMaxIt = std::max_element( m_XData.begin() , m_XData.end() );
   QVector<double>::iterator xMinIt = std::min_element( m_XData.begin() , m_XData.end() );
-  QVector<double>::iterator yMaxIt = std::max_element( m_YAXData.begin() , m_YAXData.end() );
-  QVector<double>::iterator yMinIt = std::min_element( m_YAXData.begin() , m_YAXData.end() );
 
-  qreal yPlotMin = *yMinIt;
-  qreal yPlotMax = *yMaxIt;
+  //create dynamic array for max acceleration for axes by module
+  QVector<double> yMaxIt;
+  //max X-axis
+  yMaxIt.append( *std::max_element( m_YAXData.begin() , m_YAXData.end() ) );
+  //max X-axis by module
+  yMaxIt.append( fabs( *std::min_element(m_YAXData.begin() , m_YAXData.end() ) ) );
+  //max Y-axis
+  yMaxIt.append( *std::max_element( m_YAYData.begin() , m_YAYData.end() ) );
+  //max Y-axis by module
+  yMaxIt.append( fabs( *std::min_element( m_YAYData.begin() , m_YAYData.end() ) ) );
+  //max Z-axis
+  yMaxIt.append( *std::max_element( m_YAZData.begin() , m_YAZData.end() ) );
+  //max Z-axis by module
+  yMaxIt.append( fabs( *std::min_element( m_YAZData.begin() , m_YAZData.end() ) ) );
 
   qreal xPlotMin = *xMinIt;
   qreal xPlotMax = *xMaxIt;
 
   //find maximum absolute value
-  qreal yMax = fabs(yPlotMax);
-  if(yMax < fabs(yPlotMin)){
-      yMax = fabs(yPlotMin);
-    }
+  qreal yMax = fabs(*std::max_element( yMaxIt.begin() , yMaxIt.end() ) );
 
   // The yOffset just to make sure that the graph won't take the whole
   // space in the plot widget, and to keep a margin at the top, the same goes for xOffset
@@ -291,19 +304,31 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   //************************************************************//
   // Generate the data for the horizontal line, that changes with
   // the last value of the main graph
+  QVector<double> tmpYXData;
   QVector<double> tmpYYData;
+  QVector<double> tmpYZData;
   QVector<double> tmpXXData;
   // Since it's a horizontal line, we only need to feed it two points
   // and both points have the y value
-  tmpYYData.append( m_YAXData.last() );
-  tmpYYData.append( m_YAXData.last() );
+  tmpYXData.append( m_YAXData.last() );
+  tmpYXData.append( m_YAXData.last() );
+
+  tmpYYData.append( m_YAYData.last() );
+  tmpYYData.append( m_YAYData.last() );
+
+  tmpYZData.append( m_YAZData.last() );
+  tmpYZData.append( m_YAZData.last() );
 
   // To make the line cross the plot widget horizontally,
   // from extreme left to extreme right
   tmpXXData.append( m_XData.first() );
   tmpXXData.append( m_XData.last() + xOffset );
+
   // Finaly set the horizental line data
-  m_CustomPlot->graph( 1 )->setData( tmpXXData , tmpYYData );
+  m_CustomPlot->graph( 1 )->setData( tmpXXData , tmpYXData );
+  m_CustomPlot->graph( 3 )->setData( tmpXXData , tmpYYData );
+  m_CustomPlot->graph( 5 )->setData( tmpXXData , tmpYZData );
+
 //************************************************************//
   // Now to the text item that displays the current value
   // as a string.
@@ -311,12 +336,24 @@ void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t
   // the offsets here are just to make the text appear
   // next and above a the horizontal line.
   qreal indexX = m_XData.last() + 0.5 * xOffset;
-  qreal indexY = m_YAXData.last() + 0.2 * yOffset;
+  qreal indexYX = m_YAXData.last() + 0.2 * yOffset;
+  qreal indexYY = m_YAYData.last() + 0.3 * yOffset;
+  qreal indexYZ = m_YAZData.last() + 0.4 * yOffset;
 
   // Set the coordinate that we calculated
-  m_ValueIndex->position->setCoords( indexX , indexY );
+  m_ValueIndexX->position->setCoords( indexX , indexYX );
   // Set the text that we want to display
-  m_ValueIndex->setText(  QString::number( tmpYYData.last() ) + "  M/C²" );
+  m_ValueIndexX->setText(  QString::number( tmpYXData.last() ) + "  M/C²" );
+
+  // Set the coordinate that we calculated
+  m_ValueIndexY->position->setCoords( indexX , indexYY );
+  // Set the text that we want to display
+  m_ValueIndexY->setText(  QString::number( tmpYYData.last() ) + "  M/C²" );
+
+  // Set the coordinate that we calculated
+  m_ValueIndexZ->position->setCoords( indexX , indexYZ );
+  // Set the text that we want to display
+  m_ValueIndexZ->setText(  QString::number( tmpYZData.last() ) + "  M/C²" );
 
 
   // Update the plot widget
