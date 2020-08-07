@@ -38,23 +38,26 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   console = new Console;
   console->setEnabled(false);
 
-  graph = new Graph;
+  accelerometerGraph  = new Graph();
+  gyroscopeGraph      = new Graph();
+  magnetometerGraph   = new Graph();
 
 //  tabs routine
   tabs = new QTabWidget(centralWidget);
 
   tabs->setMinimumSize(this->size());
+
 //  tabs->addTab(new GeneralTab("simple text"), tr("General"));
-  tabs->addTab(new GraphTab(*graph), tr("Graph"));
+  tabs->addTab(new GraphTab(*accelerometerGraph, *gyroscopeGraph, *magnetometerGraph), tr("Graph"));
+
   tabs->addTab(new ConsoleTab(*console), tr("Console"));
 //  tabs->show();
   this->setCentralWidget(centralWidget);
 
-//   QVBoxLayout *mainLayout = new QVBoxLayout;
-//   mainLayout->addWidget(tabs);
-//   setLayout(mainLayout);
+//to not to interfere console width
+  this->setMinimumWidth(1020);
 
-  // Timer for reading raw data (every 10ms)
+// Timer for reading raw data (every 10ms)
   QTimer *timerArduino = new QTimer();
   timerArduino->connect(timerArduino, SIGNAL(timeout()),this, SLOT(onTimerReadData()));
   timerArduino->start(10);
@@ -144,8 +147,9 @@ void MainWindow::createToolBars(){
 
 void MainWindow::resizeEvent(QResizeEvent *){
   tabs->setMinimumSize(centralWidget()->size());
-
+  tabs->setMaximumSize(centralWidget()->size());
 }
+
 //Status Bar
 void MainWindow::createStatusBar(){
   if(isConnected){
@@ -249,7 +253,7 @@ void MainWindow::onTimerReadData(){
           QByteArray data = buffer;
 
           console->putData(data);
-          graph->dispatchData(data);
+          accelerometerGraph->dispatchData(data);
         }
     }else{
 //      QTextStream(stdout)

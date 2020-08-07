@@ -14,7 +14,7 @@ class GraphTab : public QWidget {
   Q_OBJECT
 
 public:
-  explicit GraphTab(Graph &graph, QWidget *parent = 0);
+  explicit GraphTab(Graph &accelerometer, Graph &gyroscope, Graph &magnetometer, QWidget *parent = 0);
 
 private:
   Graph *graph;

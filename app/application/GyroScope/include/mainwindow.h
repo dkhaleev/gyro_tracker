@@ -73,7 +73,9 @@ private:
   QString settingsFileName;
 
   Console *console;
-  Graph *graph;
+  Graph *accelerometerGraph;
+  Graph *gyroscopeGraph;
+  Graph *magnetometerGraph;
 
   //global port variables;
   QString portName;

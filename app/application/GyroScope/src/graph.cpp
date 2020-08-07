@@ -47,13 +47,12 @@ Graph::Graph(QWidget *parent):
 {
   QVBoxLayout *layout = new QVBoxLayout;
 //  ui->setupUi(this);
-  setMinimumWidth( 900 );
+  setMinimumWidth(1020);
+
   // Allocate memory for the plot widget object
   m_CustomPlot = new QCustomPlot( this );
   // The next line is responsible for adding
   // the plot widget to our application's main window
-//  setCentralWidget( m_CustomPlot ); // there is no need to add and promote a widget
-
 
   // Add a graph to the plot widget ( the main accelerometer x-axis graph )
   m_CustomPlot->addGraph();
@@ -116,12 +115,11 @@ Graph::Graph(QWidget *parent):
   m_CustomPlot->graph( 4 )->setPen( QColor() );
   m_CustomPlot->graph( 5 )->setPen( QColor() );
 
-  m_CustomPlot->setMinimumSize(this->minimumWidth(), 200);
+  m_CustomPlot->setMinimumSize(this->minimumWidth(), 180);
 
-  this->setFixedHeight(200);
+  this->setFixedHeight(180);
   this->setLayout(layout);
   this->show();
-
 }
 
 void Graph::updatePlot()
