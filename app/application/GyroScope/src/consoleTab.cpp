@@ -11,6 +11,6 @@ ConsoleTab::ConsoleTab(Console &console, QWidget *parent) : QWidget(parent)
   mainLayout->addWidget(consoleLabel);
   mainLayout->addWidget(&console);
 
-  mainLayout->addStretch(1);
   setLayout(mainLayout);
 }
+
