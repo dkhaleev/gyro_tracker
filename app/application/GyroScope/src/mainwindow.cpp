@@ -253,7 +253,9 @@ void MainWindow::onTimerReadData(){
           QByteArray data = buffer;
 
           console->putData(data);
-          accelerometerGraph->dispatchData(data);
+          accelerometerGraph->dispatchData(core_time, iax, iay, iaz);
+          gyroscopeGraph->dispatchData(core_time, igx, igy, igz);
+          magnetometerGraph->dispatchData(core_time, imx, imy, imz);
         }
     }else{
 //      QTextStream(stdout)

@@ -99,20 +99,13 @@ Graph::Graph(QWidget *parent):
   QColor AYBrushClr = Qt::green;
   QColor AZBrushClr = Qt::blue;
 
-  AXBrushClr.setAlphaF( .3 );
-  AYBrushClr.setAlphaF( .3 );
-  AZBrushClr.setAlphaF( .3 );
-
-  m_CustomPlot->graph( 0 )->setBrush( AXBrushClr );
-  m_CustomPlot->graph( 0 )->setPen( QColor() );
+  m_CustomPlot->graph( 0 )->setPen( AXBrushClr );
   m_CustomPlot->graph( 1 )->setPen( QColor() );
 
-  m_CustomPlot->graph( 2 )->setBrush( AYBrushClr );
-  m_CustomPlot->graph( 2 )->setPen( QColor() );
+  m_CustomPlot->graph( 2 )->setPen( AYBrushClr );
   m_CustomPlot->graph( 3 )->setPen( QColor() );
 
-  m_CustomPlot->graph( 4 )->setBrush( AZBrushClr );
-  m_CustomPlot->graph( 4 )->setPen( QColor() );
+  m_CustomPlot->graph( 4 )->setPen( AZBrushClr );
   m_CustomPlot->graph( 5 )->setPen( QColor() );
 
   m_CustomPlot->setMinimumSize(this->minimumWidth(), 180);
@@ -205,30 +198,7 @@ void Graph::updatePlot()
     m_CustomPlot->replot();
 }
 
-void Graph::dispatchData(const QByteArray &data){
-
-  sscanf(data, "%lu %lu %lu %hu %hu %hu %hu %hu %hu %hu %hu %hu",
-         &counter,
-         &packet_id,
-         &core_time,
-         &iax,
-         &iay,
-         &iaz,
-         &igx,
-         &igy,
-         &igz,
-         &imx,
-         &imy,
-         &imz
-         );
-
-
-//      QTextStream(stdout) << printf("Graph dispatch index [%lu] \r\n", packet_id);
-
-     dispatchAccelerometer(core_time, iax, iay, iaz);
-}
-
-void Graph::dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz){
+void Graph::dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz){
   //stuff X-axis data storage
   m_XData.append(core_time);
 

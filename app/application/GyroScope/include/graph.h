@@ -19,7 +19,7 @@ class Graph : public QFrame
 public:
   explicit Graph(QWidget *parent = 0);
 
-  void dispatchData(const QByteArray &data);
+  void dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz);
 
   void dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz);
 
