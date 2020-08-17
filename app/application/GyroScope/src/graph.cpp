@@ -31,6 +31,8 @@ double yval[Size];
 QwtScaleMap xMap;
 QwtScaleMap yMap;
 
+QString type;
+
 // Preverse parse raw data
 long int counter = 0;
 unsigned long packet_id = 0;
@@ -40,13 +42,21 @@ int16_t  iax, iay, iaz = 0;
 int16_t  igx, igy, igz = 0;
 int16_t  imx, imy, imz = 0;
 
+QStringList types;
+
 //new style via QCustomPlot
-Graph::Graph(QWidget *parent):
+Graph::Graph(QWidget *parent, QString graphType):
   m_CustomPlot(0),
   timeInterval(400)
 {
+  types << "accel" << "gyro" << "mag";
+
+  //set graph type: accelerometer, gyroscope, magnetometer
+  type = graphType;
+  QTextStream(stdout) << type << "<<<<<<<<===============Assign type \r\n";
+
   QVBoxLayout *layout = new QVBoxLayout;
-//  ui->setupUi(this);
+
   setMinimumWidth(1020);
 
   // Allocate memory for the plot widget object
@@ -113,6 +123,10 @@ Graph::Graph(QWidget *parent):
   this->setFixedHeight(180);
   this->setLayout(layout);
   this->show();
+}
+
+QString Graph::getType(){
+  return type;
 }
 
 void Graph::updatePlot()
@@ -227,10 +241,64 @@ void Graph::dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int
   double d_iay = 1.0 * iay;
   double d_iaz = 1.0 * iaz;
 
-  //stuff X-axis data storage for accelerometer X,Y and Z axes
-  m_YAXData.append((d_iax/8192)*9.8); //  (data/ +/- accelerometer range)*9.8 m/s^2 -> value normalized to m/s^2
-  m_YAYData.append((d_iay/8192)*9.8);
-  m_YAZData.append((d_iaz/8192)*9.8);
+  //since sensor uses two-bytes Words for each axis value(2 bytes) is signed
+  //so we need to conver them to  -32768 till +32768 depend on your scale  for
+  //accelerometer ( ±2g, ±4g, ±8g and ±16g)
+  //gyroscope ( ±250, ±500, ±1000, and ±2000°/sec )
+
+  //We need to dovode output values from sensor according to selected sensor range
+  //For example for 16G we divide output/2048 (if we have stable the sensor Z axe will
+  //show us 1 gravity , so if it show you 2048 the accelerometer is on +-16G mode)
+  //We get samples in internal, if we get every 0.001sec you -> velocityZ =accelerationZ*0.001*G
+  // => velocityZ=accelerationZ*0.001*9.8
+  //  G=9.8m/s2.
+
+  //stuff X-axis data storage for sensor X,Y and Z axes
+  //  (data/ +/- sensor range[bytes])*9.8 m/s^2 -> value normalized to m/s^2
+
+  //8192 used in acceleration block is for ±4g doubled (positive and negative)
+  //  AFS_SEL | Full Scale Range | LSB Sensitivity
+  //     --------+------------------+----------------
+  //     0       | ± 2g           | 8192 LSB/mg
+  //     1       | ± 4g           | 4096 LSB/mg
+  //     2       | ± 8g           | 2048 LSB/mg
+  //     3       | ± 16g          | 1024 LSB/mg
+
+  //8192 used in inclination block is for ±1000 degrees/s doubled (positive and negative)
+  //  FS_SEL | Full Scale Range   | LSB Sensitivity
+  //  -------+--------------------+----------------
+  //  0      | ± 250 degrees/s  | 131 LSB/deg/s
+  //  1      | ± 500 degrees/s  | 65.5 LSB/deg/s
+  //  2      | ± 1000 degrees/s | 32.8 LSB/deg/s
+  //  3      | ± 2000 degrees/s | 16.4 LSB/deg/s
+
+  //dimensions
+  QString dimensions;
+  dimensions = "M/C²";
+
+  switch(types.indexOf(type))
+    {
+    case 0: //accel
+      dimensions = "M/s²";
+      m_YAXData.append((d_iax/8192)*9.8);
+      m_YAYData.append((d_iay/8192)*9.8);
+      m_YAZData.append((d_iaz/8192)*9.8);
+      break;
+    case 1: //gyro
+      dimensions = "Deg/s";
+      m_YAXData.append(d_iax/32.8);
+      m_YAYData.append(d_iay/32.8);
+      m_YAZData.append(d_iaz/32.8);
+      break;
+    case 2: //mag -- @todo: dummy value for now. Does not represents the real values
+      dimensions = "Deg/s";
+      m_YAXData.append((d_iax/8192)*9.8);
+      m_YAYData.append((d_iay/8192)*9.8);
+      m_YAZData.append((d_iaz/8192)*9.8);
+      break;
+    }
+
+
 
   //add the data to the x-axis accelerometer graph
   m_CustomPlot->graph(0)->setData(m_XData, m_YAXData);
@@ -292,11 +360,6 @@ void Graph::dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int
   tmpXXData.append( m_XData.first() );
   tmpXXData.append( m_XData.last() + xOffset );
 
-  // Finaly set the horizental line data
-  m_CustomPlot->graph( 1 )->setData( tmpXXData , tmpYXData );
-  m_CustomPlot->graph( 3 )->setData( tmpXXData , tmpYYData );
-  m_CustomPlot->graph( 5 )->setData( tmpXXData , tmpYZData );
-
 //************************************************************//
   // Now to the text item that displays the current value
   // as a string.
@@ -311,17 +374,17 @@ void Graph::dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int
   // Set the coordinate that we calculated
   m_ValueIndexX->position->setCoords( indexX , indexYX );
   // Set the text that we want to display
-  m_ValueIndexX->setText(  QString::number( tmpYXData.last() ) + "  M/C²" );
+  m_ValueIndexX->setText(  QString::number( tmpYXData.last() ) + " " + dimensions );
 
   // Set the coordinate that we calculated
   m_ValueIndexY->position->setCoords( indexX , indexYY );
   // Set the text that we want to display
-  m_ValueIndexY->setText(  QString::number( tmpYYData.last() ) + "  M/C²" );
+  m_ValueIndexY->setText(  QString::number( tmpYYData.last() ) + " " + dimensions );
 
   // Set the coordinate that we calculated
   m_ValueIndexZ->position->setCoords( indexX , indexYZ );
   // Set the text that we want to display
-  m_ValueIndexZ->setText(  QString::number( tmpYZData.last() ) + "  M/C²" );
+  m_ValueIndexZ->setText(  QString::number( tmpYZData.last() ) + " " + dimensions );
 
 
   // Update the plot widget

@@ -17,7 +17,9 @@ class Graph : public QFrame
   Q_OBJECT
 
 public:
-  explicit Graph(QWidget *parent = 0);
+  explicit Graph(QWidget *parent = 0, QString graphType = "");
+
+  QString getType();
 
   void dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz);
 
@@ -33,7 +35,7 @@ private slots:
     void updatePlot();
 
 private:
-//    Ui::MainWindow *ui;
+    QString type;
     // Our custom plot widget
     QCustomPlot * m_CustomPlot;
     // This object will hold the current value as a text
