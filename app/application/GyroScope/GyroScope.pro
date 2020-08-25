@@ -31,6 +31,7 @@ SOURCES += \
         src/consoleTab.cpp \
         src/generalTab.cpp \
         src/graph.cpp \
+        src/graphMeter.cpp \
         src/graphTab.cpp \
         src/main.cpp \
         src/mainwindow.cpp \
@@ -43,6 +44,7 @@ HEADERS += \
         include/consoleTab.h \
         include/generalTab.h \
         include/graph.h \
+        include/graphMeter.h \
         include/graphTab.h \
         include/mainwindow.h \
         include/qcustomplot.h \

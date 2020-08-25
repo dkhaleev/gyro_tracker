@@ -21,13 +21,9 @@ public:
 
   QString getType();
 
-  void dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz);
+  void dispatchData(unsigned long core_time, float  iax, float iay, float iaz);
 
-  void dispatchAccelerometer(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz);
-
-  void dispatchGyroscope(const QByteArray &data);
-
-  void dispatchMagnetometer(const QByteArray &data);
+  double dax, day, daz = 0;
 
 private slots:
     // This function is responsible for ploting
@@ -54,7 +50,8 @@ private:
     QVector<qreal> m_YAYData; //Y-asis graph accelerometer Y-axis data
     QVector<qreal> m_YAZData; //Y-axis graph acceleromete Z-axis data
 
-
+signals:
+    void dataDispatched(double, double, double);
 };
 
 #endif // GRAPH_H

@@ -2,6 +2,7 @@
 #define GRAPHTAB_H
 
 #include <QDialog>
+#include <QObject>
 #include "graph.h"
 
 QT_BEGIN_NAMESPACE

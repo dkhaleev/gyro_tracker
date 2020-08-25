@@ -38,9 +38,19 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   console = new Console;
   console->setEnabled(false);
 
-  accelerometerGraph  = new Graph();
-  gyroscopeGraph      = new Graph();
-  magnetometerGraph   = new Graph();
+  QString type;
+
+  type = "accel";
+  accelerometerGraph  = new Graph(parent, type);
+//  accelerometerGraph->setType(type);
+
+  type = "gyro";
+  gyroscopeGraph      = new Graph(parent, type);
+//  gyroscopeGraph->setType(type);
+
+  type = "mag";
+  magnetometerGraph   = new Graph(parent, type);
+//  magnetometerGraph->setType(type);
 
 //  tabs routine
   tabs = new QTabWidget(centralWidget);
@@ -249,13 +259,30 @@ void MainWindow::onTimerReadData(){
 //          std::cout << "\r\n";
 //          std::cout << std::endl;
 
+          // Convert into floats
+          float ax,ay,az;
+          float gx,gy,gz;
+          float mx,my,mz;
+
+          ax=iax*RATIO_ACC;
+          ay=iay*RATIO_ACC;
+          az=iaz*RATIO_ACC;
+
+          gx=(igx-48.4827)*RATIO_GYRO;
+          gy=(igy+76.3552)*RATIO_GYRO;
+          gz=(igz+64.3234)*RATIO_GYRO;
+
+          mx=imx*RATIO_MAG;
+          my=imy*RATIO_MAG;
+          mz=imz*RATIO_MAG;
+
 //          assemly data for meta-console
           QByteArray data = buffer;
 
           console->putData(data);
-          accelerometerGraph->dispatchData(core_time, iax, iay, iaz);
-          gyroscopeGraph->dispatchData(core_time, igx, igy, igz);
-          magnetometerGraph->dispatchData(core_time, imx, imy, imz);
+          accelerometerGraph->dispatchData(core_time, ax, ay, az);
+          gyroscopeGraph->dispatchData(core_time, gx, gy, gz);
+          magnetometerGraph->dispatchData(core_time, mx, my, mz);
         }
     }else{
 //      QTextStream(stdout)

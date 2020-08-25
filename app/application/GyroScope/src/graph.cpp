@@ -38,10 +38,6 @@ long int counter = 0;
 unsigned long packet_id = 0;
 unsigned long core_time = 0;
 
-int16_t  iax, iay, iaz = 0;
-int16_t  igx, igy, igz = 0;
-int16_t  imx, imy, imz = 0;
-
 QStringList types;
 
 //new style via QCustomPlot
@@ -53,7 +49,6 @@ Graph::Graph(QWidget *parent, QString graphType):
 
   //set graph type: accelerometer, gyroscope, magnetometer
   type = graphType;
-  QTextStream(stdout) << type << "<<<<<<<<===============Assign type \r\n";
 
   QVBoxLayout *layout = new QVBoxLayout;
 
@@ -212,7 +207,7 @@ void Graph::updatePlot()
     m_CustomPlot->replot();
 }
 
-void Graph::dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int16_t iaz){
+void Graph::dispatchData(unsigned long core_time, float  iax, float iay, float iaz){
   //stuff X-axis data storage
   m_XData.append(core_time);
 
@@ -237,9 +232,9 @@ void Graph::dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int
     }
 
 //  argument type conversion
-  double d_iax = 1.0 * iax;
-  double d_iay = 1.0 * iay;
-  double d_iaz = 1.0 * iaz;
+  double d_iax = iax;
+  double d_iay = iay;
+  double d_iaz = iaz;
 
   //since sensor uses two-bytes Words for each axis value(2 bytes) is signed
   //so we need to conver them to  -32768 till +32768 depend on your scale  for
@@ -274,7 +269,7 @@ void Graph::dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int
 
   //dimensions
   QString dimensions;
-  dimensions = "M/C²";
+  dimensions = "M/s²";
 
   switch(types.indexOf(type))
     {
@@ -283,18 +278,33 @@ void Graph::dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int
       m_YAXData.append((d_iax/8192)*9.8);
       m_YAYData.append((d_iay/8192)*9.8);
       m_YAZData.append((d_iaz/8192)*9.8);
+      emit dataDispatched(
+            (d_iax/8192)*9.8,
+            (d_iay/8192)*9.8,
+            (d_iaz/8192)*9.8
+            );
       break;
     case 1: //gyro
       dimensions = "Deg/s";
       m_YAXData.append(d_iax/32.8);
       m_YAYData.append(d_iay/32.8);
       m_YAZData.append(d_iaz/32.8);
+      emit dataDispatched(
+            d_iax/32.8,
+            d_iay/32.8,
+            d_iaz/32.8
+            );
       break;
     case 2: //mag -- @todo: dummy value for now. Does not represents the real values
       dimensions = "Deg/s";
       m_YAXData.append((d_iax/8192)*9.8);
       m_YAYData.append((d_iay/8192)*9.8);
       m_YAZData.append((d_iaz/8192)*9.8);
+      emit dataDispatched(
+            (d_iax/8192)*9.8,
+            (d_iay/8192)*9.8,
+            (d_iaz/8192)*9.8
+            );
       break;
     }
 
@@ -389,6 +399,5 @@ void Graph::dispatchData(unsigned long core_time, int16_t  iax, int16_t iay, int
 
   // Update the plot widget
   m_CustomPlot->replot();
-
 
 }
