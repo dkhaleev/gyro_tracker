@@ -370,31 +370,32 @@ void Graph::dispatchData(unsigned long core_time, float  iax, float iay, float i
   tmpXXData.append( m_XData.first() );
   tmpXXData.append( m_XData.last() + xOffset );
 
-//************************************************************//
-  // Now to the text item that displays the current value
-  // as a string.
-  // These are the coordinates of the text item,
-  // the offsets here are just to make the text appear
-  // next and above a the horizontal line.
-  qreal indexX = m_XData.last() + 0.5 * xOffset;
-  qreal indexYX = m_YAXData.last() + 0.2 * yOffset;
-  qreal indexYY = m_YAYData.last() + 0.3 * yOffset;
-  qreal indexYZ = m_YAZData.last() + 0.4 * yOffset;
+//Disabled due the bamming
+////************************************************************//
+//  // Now to the text item that displays the current value
+//  // as a string.
+//  // These are the coordinates of the text item,
+//  // the offsets here are just to make the text appear
+//  // next and above a the horizontal line.
+//  qreal indexX = m_XData.last() + 0.5 * xOffset;
+//  qreal indexYX = m_YAXData.last() + 0.2 * yOffset;
+//  qreal indexYY = m_YAYData.last() + 0.3 * yOffset;
+//  qreal indexYZ = m_YAZData.last() + 0.4 * yOffset;
 
-  // Set the coordinate that we calculated
-  m_ValueIndexX->position->setCoords( indexX , indexYX );
-  // Set the text that we want to display
-  m_ValueIndexX->setText(  QString::number( tmpYXData.last() ) + " " + dimensions );
+//  // Set the coordinate that we calculated
+//  m_ValueIndexX->position->setCoords( indexX , indexYX );
+//  // Set the text that we want to display
+//  m_ValueIndexX->setText(  QString::number( tmpYXData.last() ) + " " + dimensions );
 
-  // Set the coordinate that we calculated
-  m_ValueIndexY->position->setCoords( indexX , indexYY );
-  // Set the text that we want to display
-  m_ValueIndexY->setText(  QString::number( tmpYYData.last() ) + " " + dimensions );
+//  // Set the coordinate that we calculated
+//  m_ValueIndexY->position->setCoords( indexX , indexYY );
+//  // Set the text that we want to display
+//  m_ValueIndexY->setText(  QString::number( tmpYYData.last() ) + " " + dimensions );
 
-  // Set the coordinate that we calculated
-  m_ValueIndexZ->position->setCoords( indexX , indexYZ );
-  // Set the text that we want to display
-  m_ValueIndexZ->setText(  QString::number( tmpYZData.last() ) + " " + dimensions );
+//  // Set the coordinate that we calculated
+//  m_ValueIndexZ->position->setCoords( indexX , indexYZ );
+//  // Set the text that we want to display
+//  m_ValueIndexZ->setText(  QString::number( tmpYZData.last() ) + " " + dimensions );
 
 
   // Update the plot widget

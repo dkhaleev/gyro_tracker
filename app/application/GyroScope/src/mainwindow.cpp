@@ -279,10 +279,16 @@ void MainWindow::onTimerReadData(){
 //          assemly data for meta-console
           QByteArray data = buffer;
 
-          console->putData(data);
-          accelerometerGraph->dispatchData(core_time, ax, ay, az);
-          gyroscopeGraph->dispatchData(core_time, gx, gy, gz);
-          magnetometerGraph->dispatchData(core_time, mx, my, mz);
+          QString currentTabName = tabs->tabText(tabs->currentIndex());
+          QTextStream(stdout)<< "Tab name " << currentTabName << " index " << tabs->currentIndex() << " \r\n";
+
+          if(currentTabName == "Console"){
+              console->putData(data);
+          }else if(currentTabName == "Graph"){
+              accelerometerGraph->dispatchData(core_time, ax, ay, az);
+              gyroscopeGraph->dispatchData(core_time, gx, gy, gz);
+              magnetometerGraph->dispatchData(core_time, mx, my, mz);
+          }
         }
     }else{
 //      QTextStream(stdout)
