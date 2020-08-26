@@ -280,7 +280,6 @@ void MainWindow::onTimerReadData(){
           QByteArray data = buffer;
 
           QString currentTabName = tabs->tabText(tabs->currentIndex());
-          QTextStream(stdout)<< "Tab name " << currentTabName << " index " << tabs->currentIndex() << " \r\n";
 
           if(currentTabName == "Console"){
               console->putData(data);
