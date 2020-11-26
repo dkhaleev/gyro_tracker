@@ -34,33 +34,42 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
 
   QWidget *centralWidget = new QWidget(this);
 
-//  console routine
-  console = new Console;
-  console->setEnabled(false);
-
-  QString type;
-
-  type = "accel";
-  accelerometerGraph  = new Graph(parent, type);
-//  accelerometerGraph->setType(type);
-
-  type = "gyro";
-  gyroscopeGraph      = new Graph(parent, type);
-//  gyroscopeGraph->setType(type);
-
-  type = "mag";
-  magnetometerGraph   = new Graph(parent, type);
-//  magnetometerGraph->setType(type);
-
-//  tabs routine
+  //  tabs routine
   tabs = new QTabWidget(centralWidget);
 
   tabs->setMinimumSize(this->size());
 
-//  tabs->addTab(new GeneralTab("simple text"), tr("General"));
-  tabs->addTab(new GraphTab(*accelerometerGraph, *gyroscopeGraph, *magnetometerGraph), tr("Graph"));
+//  console routine
+      QString type;
 
-  tabs->addTab(new ConsoleTab(*console), tr("Console"));
+      type = "accel";
+      accelerometerGraph  = new Graph(parent, type);
+
+      type = "gyro";
+      gyroscopeGraph      = new Graph(parent, type);
+
+      type = "mag";
+      magnetometerGraph   = new Graph(parent, type);
+      graphTab = new GraphTab(*accelerometerGraph, *gyroscopeGraph, *magnetometerGraph);
+
+      if(graphTabView){
+
+          tabs->addTab(graphTab, tr("Graph"));
+        }
+
+
+
+//  tabs->addTab(new GeneralTab("simple text"), tr("General"));
+
+
+  console = new Console;
+  consoleTab = new ConsoleTab(*console);
+  if(consoleTabView){
+      tabs->addTab(consoleTab, tr("Console"));
+    }
+//  console->setEnabled(false);
+  
+  
 //  tabs->show();
   this->setCentralWidget(centralWidget);
 
@@ -77,14 +86,19 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
 void MainWindow::loadSettings()
 {
   QSettings settings(settingsFileName, QSettings::IniFormat);
-  portName      = settings.value("portName", "").toString();
-  portLocation  = settings.value("portLocation", "").toString();
+  portName       = settings.value("portName", "").toString();
+  portLocation   = settings.value("portLocation", "").toString();
+  graphTabView   = settings.value("graphTabView", false).toBool();
+  consoleTabView = settings.value("consoleTabView", false).toBool();
 }
 
 void MainWindow::saveSettings(){
   QSettings settings(settingsFileName, QSettings::IniFormat);
   settings.value("portName", portName);
   settings.value("portLocation", portLocation);
+  settings.value("graphTabView", graphTabView);
+  settings.value("consoleTabView", consoleTabView);
+
 }
 
 void MainWindow::createActions(){
@@ -93,6 +107,26 @@ void MainWindow::createActions(){
 
   disconnectAct = new QAction(QIcon(""), tr("&Disconnect"), this);
   connect(disconnectAct, SIGNAL(triggered()), this, SLOT(disconnectDevice()));
+
+  graphsAction = new QAction("&Graps", this);
+  graphsAction->setCheckable(true);
+  graphsAction->setChecked(false);
+  graphsAction->setData(0);
+  if(graphTabView == true){
+      graphsAction->setChecked(true);
+      graphsAction->setData(true);
+    }
+  connect(graphsAction, SIGNAL(triggered()), this, SLOT(graphsMenuActionTriggered()));
+
+  consoleAction = new QAction("&Console", this);
+  consoleAction->setCheckable(true);
+  consoleAction->setChecked(false);
+  consoleAction->setData(false);
+  if(consoleTabView == true){
+      consoleAction->setChecked(true);
+      consoleAction->setData(true);
+    }
+  connect(consoleAction, SIGNAL(triggered()), this, SLOT(consoleMenuActionTriggered()));
 
 
   QTextStream(stdout) << "PN " << portName << "\r\n";
@@ -108,9 +142,12 @@ void MainWindow::createMenus(){
   //  View
   viewMenu = menuBar()->addMenu(tr("&View"));
 
+  tabsMenu = viewMenu->addMenu(tr("&Tabs"));    
+
+  tabsMenu->addAction(graphsAction);
+  tabsMenu->addAction(consoleAction);
   //  Params
   paramsMenu = menuBar()->addMenu(tr("&Parameters"));
-
 
   //port settings
   QList<QSerialPortInfo> list;
@@ -172,7 +209,7 @@ void MainWindow::createStatusBar(){
 bool MainWindow::connectDevice(){
   QTextStream(stdout) << "Connect Action " << portLocation << "\r\n";
 
-  if(mpu9250.openDevice(portLocation.toLocal8Bit().data(), 115200)!=1){
+  if(mpu9250.openDevice(portLocation.toLocal8Bit().data(), 9600)!=1){
       std::cerr << "Error while opening serial device" << std::endl;
       isConnected = false;
       stateWasModified();
@@ -206,6 +243,33 @@ void MainWindow::portMenuActionTriggered(QAction * action){
   stateWasModified();
  }
 
+void MainWindow::graphsMenuActionTriggered(){
+  QSettings settings(settingsFileName, QSettings::IniFormat);
+  graphTabView = !graphTabView;
+  settings.setValue("graphTabView", graphTabView);
+  settings.sync();
+  stateWasModified();
+  if(graphTabView){
+      tabs->addTab(graphTab, tr("Graph"));
+    }else{
+//      QTextStream(stdout) << "Graphs tab index " << tabs->indexOf(graphTab) << "\r\n";
+      tabs->removeTab(tabs->indexOf(graphTab));
+    }
+}
+
+void MainWindow::consoleMenuActionTriggered(){
+  QSettings settings(settingsFileName, QSettings::IniFormat);
+  consoleTabView =!consoleTabView;
+  settings.setValue("consoleTabView", consoleTabView);
+  settings.sync();
+  stateWasModified();
+  if(consoleTabView){
+      tabs->addTab(consoleTab, tr("Console"));
+    }else{
+//      QTextStream(stdout) << "Console tab index " << tabs->indexOf(consoleTab) << "\r\n";
+      tabs->removeTab(tabs->indexOf(consoleTab));
+    }
+}
 
 //some sort of rations
 //@TODO: research later
@@ -220,8 +284,8 @@ void MainWindow::onTimerReadData(){
       if(mpu9250.peekReceiver())
         {
           //Read block
-          char buffer[200];
-          mpu9250.readString(buffer, '\n', 200, 0);
+          char buffer[300];
+          mpu9250.readString(buffer, '\n', 300, 0);
 
           // Parse raw data
           long int counter = 0;
@@ -248,16 +312,15 @@ void MainWindow::onTimerReadData(){
                  );
 
 //          // Display raw data
-//          std::cout << counter << "\t";
-//          std::cout << packet_id << "\t";
-//          std::cout << core_time << "\t";
-//          std::cout << iax ;
+          std::cout << counter << "\t";
+          std::cout << packet_id << "\t";
+          std::cout << core_time << "\t";
 
-//          std::cout << iax << "\t" << iay << "\t" << iaz << "\t";
-//          std::cout << igx << "\t" << igy << "\t" << igz << "\t";
-//          std::cout << imx << "\t" << imy << "\t" << imz << "\t";
+          std::cout << iax << "\t" << iay << "\t" << iaz << "\t";
+          std::cout << igx << "\t" << igy << "\t" << igz << "\t";
+          std::cout << imx << "\t" << imy << "\t" << imz << "\t";
 //          std::cout << "\r\n";
-//          std::cout << std::endl;
+          std::cout << std::endl;
 
           // Convert into floats
           float ax,ay,az;
@@ -281,9 +344,9 @@ void MainWindow::onTimerReadData(){
 
           QString currentTabName = tabs->tabText(tabs->currentIndex());
 
-          if(currentTabName == "Console"){
+          if(currentTabName == "Console" && consoleTabView){
               console->putData(data);
-          }else if(currentTabName == "Graph"){
+          }else if(currentTabName == "Graph" && graphTabView){
               accelerometerGraph->dispatchData(core_time, ax, ay, az);
               gyroscopeGraph->dispatchData(core_time, gx, gy, gz);
               magnetometerGraph->dispatchData(core_time, mx, my, mz);

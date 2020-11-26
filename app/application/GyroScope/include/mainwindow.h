@@ -30,6 +30,8 @@ private:
 
 private slots:
   void portMenuActionTriggered(QAction * action);
+  void consoleMenuActionTriggered();
+  void graphsMenuActionTriggered();
   bool connectDevice();
   bool disconnectDevice();
 
@@ -55,6 +57,7 @@ private:
 
   QMenu *fileMenu;
   QMenu *viewMenu;
+  QMenu *tabsMenu;
   QMenu *paramsMenu;
   QMenu *portMenu;
   QMenu *baudrateMenu;
@@ -66,6 +69,8 @@ private:
 
   QAction *connectAct;
   QAction *disconnectAct;
+  QAction *graphsAction;
+  QAction *consoleAction;
 
   QWidget generalTabWidget;
   QTabWidget *tabWidget;
@@ -77,9 +82,15 @@ private:
   Graph *gyroscopeGraph;
   Graph *magnetometerGraph;
 
+  GraphTab *graphTab;
+  ConsoleTab *consoleTab;
+
   //global port variables;
   QString portName;
   QString portLocation;
+
+  bool consoleTabView;
+  bool graphTabView;
   bool isConnected = false;
 
   //serial device
