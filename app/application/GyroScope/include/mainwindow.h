@@ -30,6 +30,7 @@ private:
 
 private slots:
   void portMenuActionTriggered(QAction * action);
+  void generalMenuActionTriggered();
   void consoleMenuActionTriggered();
   void graphsMenuActionTriggered();
   bool connectDevice();
@@ -69,6 +70,7 @@ private:
 
   QAction *connectAct;
   QAction *disconnectAct;
+  QAction *generalAction;
   QAction *graphsAction;
   QAction *consoleAction;
 
@@ -84,11 +86,14 @@ private:
 
   GraphTab *graphTab;
   ConsoleTab *consoleTab;
+  GeneralTab *generalTab;
+
 
   //global port variables;
   QString portName;
   QString portLocation;
 
+  bool generalTabView;
   bool consoleTabView;
   bool graphTabView;
   bool isConnected = false;

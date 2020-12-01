@@ -39,38 +39,35 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
 
   tabs->setMinimumSize(this->size());
 
-//  console routine
-      QString type;
-
-      type = "accel";
-      accelerometerGraph  = new Graph(parent, type);
-
-      type = "gyro";
-      gyroscopeGraph      = new Graph(parent, type);
-
-      type = "mag";
-      magnetometerGraph   = new Graph(parent, type);
-      graphTab = new GraphTab(*accelerometerGraph, *gyroscopeGraph, *magnetometerGraph);
-
-      if(graphTabView){
-
-          tabs->addTab(graphTab, tr("Graph"));
-        }
-
-
-
-//  tabs->addTab(new GeneralTab("simple text"), tr("General"));
-
-
+//  console routine  
   console = new Console;
   consoleTab = new ConsoleTab(*console);
-  if(consoleTabView){
-      tabs->addTab(consoleTab, tr("Console"));
+
+  QString type;
+
+  type = "accel";
+  accelerometerGraph  = new Graph(parent, type);
+
+  type = "gyro";
+  gyroscopeGraph      = new Graph(parent, type);
+
+  type = "mag";
+  magnetometerGraph   = new Graph(parent, type);
+  graphTab = new GraphTab(*accelerometerGraph, *gyroscopeGraph, *magnetometerGraph);
+  generalTab = new GeneralTab("simple text");
+
+  if(generalTabView){
+    tabs->insertTab(0, generalTab, tr("General"));
     }
-//  console->setEnabled(false);
+
+  if(graphTabView){
+      tabs->insertTab(1, graphTab, tr("Graph"));
+    }
+
+  if(consoleTabView){
+      tabs->insertTab(2, consoleTab, tr("Console"));
+    }
   
-  
-//  tabs->show();
   this->setCentralWidget(centralWidget);
 
 //to not to interfere console width
@@ -88,6 +85,7 @@ void MainWindow::loadSettings()
   QSettings settings(settingsFileName, QSettings::IniFormat);
   portName       = settings.value("portName", "").toString();
   portLocation   = settings.value("portLocation", "").toString();
+  generalTabView = settings.value("generalTabView", false).toBool();
   graphTabView   = settings.value("graphTabView", false).toBool();
   consoleTabView = settings.value("consoleTabView", false).toBool();
 }
@@ -96,9 +94,9 @@ void MainWindow::saveSettings(){
   QSettings settings(settingsFileName, QSettings::IniFormat);
   settings.value("portName", portName);
   settings.value("portLocation", portLocation);
+  settings.value("generalTabView", generalTabView);
   settings.value("graphTabView", graphTabView);
   settings.value("consoleTabView", consoleTabView);
-
 }
 
 void MainWindow::createActions(){
@@ -107,6 +105,16 @@ void MainWindow::createActions(){
 
   disconnectAct = new QAction(QIcon(""), tr("&Disconnect"), this);
   connect(disconnectAct, SIGNAL(triggered()), this, SLOT(disconnectDevice()));
+
+  generalAction = new QAction("&General", this);
+  generalAction->setCheckable(true);
+  generalAction->setChecked(false);
+  generalAction->setData(0);
+  if(generalTabView == true){
+      generalAction->setChecked(true);
+      generalAction->setData(true);
+    }
+  connect(generalAction, SIGNAL(triggered()), this, SLOT(generalMenuActionTriggered()));
 
   graphsAction = new QAction("&Graps", this);
   graphsAction->setCheckable(true);
@@ -144,6 +152,7 @@ void MainWindow::createMenus(){
 
   tabsMenu = viewMenu->addMenu(tr("&Tabs"));    
 
+  tabsMenu->addAction(generalAction);
   tabsMenu->addAction(graphsAction);
   tabsMenu->addAction(consoleAction);
   //  Params
@@ -243,6 +252,19 @@ void MainWindow::portMenuActionTriggered(QAction * action){
   stateWasModified();
  }
 
+void MainWindow::generalMenuActionTriggered(){
+  QSettings settings(settingsFileName, QSettings::IniFormat);
+  generalTabView = !generalTabView;
+  settings.setValue("generalTabView", generalTabView);
+  settings.sync();
+  stateWasModified();
+  if(generalTabView){
+      tabs->insertTab(0, generalTab, tr("General"));
+    }else{
+      tabs->removeTab(tabs->indexOf(generalTab));
+    }
+}
+
 void MainWindow::graphsMenuActionTriggered(){
   QSettings settings(settingsFileName, QSettings::IniFormat);
   graphTabView = !graphTabView;
@@ -250,9 +272,8 @@ void MainWindow::graphsMenuActionTriggered(){
   settings.sync();
   stateWasModified();
   if(graphTabView){
-      tabs->addTab(graphTab, tr("Graph"));
+      tabs->insertTab(1, graphTab, tr("Graph"));
     }else{
-//      QTextStream(stdout) << "Graphs tab index " << tabs->indexOf(graphTab) << "\r\n";
       tabs->removeTab(tabs->indexOf(graphTab));
     }
 }
@@ -264,9 +285,8 @@ void MainWindow::consoleMenuActionTriggered(){
   settings.sync();
   stateWasModified();
   if(consoleTabView){
-      tabs->addTab(consoleTab, tr("Console"));
+      tabs->insertTab(2, consoleTab, tr("Console"));
     }else{
-//      QTextStream(stdout) << "Console tab index " << tabs->indexOf(consoleTab) << "\r\n";
       tabs->removeTab(tabs->indexOf(consoleTab));
     }
 }
