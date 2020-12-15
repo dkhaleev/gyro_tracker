@@ -36,6 +36,7 @@ SOURCES += \
         src/graphTab.cpp \
         src/main.cpp \
         src/mainwindow.cpp \
+        src/objectGL.cpp \
         src/qcustomplot.cpp \
         src/rOc_serial.cpp \
         src/rOc_timer.cpp
@@ -48,6 +49,7 @@ HEADERS += \
         include/graphMeter.h \
         include/graphTab.h \
         include/mainwindow.h \
+        include/objectGL.h \
         include/qcustomplot.h \
         include/rOc_serial.h \
         include/rOc_timer.h \

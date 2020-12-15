@@ -55,6 +55,4 @@ GraphTab::GraphTab(Graph &accelerometer, Graph &gyroscope, Graph &magnetometer, 
                    );
 
   setLayout(mainLayout);
-
-  this->show();
 }

@@ -79,10 +79,11 @@ private:
 
   QString settingsFileName;
 
-  Console *console;
-  Graph *accelerometerGraph;
-  Graph *gyroscopeGraph;
-  Graph *magnetometerGraph;
+  Console       *console;
+  Graph         *accelerometerGraph;
+  Graph         *gyroscopeGraph;
+  Graph         *magnetometerGraph;
+  ObjectOpenGL  *objectGL;
 
   GraphTab *graphTab;
   ConsoleTab *consoleTab;

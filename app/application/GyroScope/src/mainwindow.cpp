@@ -54,7 +54,10 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   type = "mag";
   magnetometerGraph   = new Graph(parent, type);
   graphTab = new GraphTab(*accelerometerGraph, *gyroscopeGraph, *magnetometerGraph);
-  generalTab = new GeneralTab("simple text");
+
+  objectGL = new ObjectOpenGL();
+  objectGL->setObjectName(QString::fromUtf8("ObjectOpenGL"));
+  generalTab = new GeneralTab(objectGL);
 
   if(generalTabView){
     tabs->insertTab(0, generalTab, tr("General"));
