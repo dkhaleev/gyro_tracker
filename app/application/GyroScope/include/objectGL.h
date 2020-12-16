@@ -23,6 +23,7 @@ public:
 
 public slots:
     void TopView(void);
+    void IsometricView(void);
 
     void SetXRotation(int angle);
     void SetYRotation(int angle);
@@ -32,6 +33,9 @@ protected:
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
 
 signals:
     void xRotationChanged(int angle);
@@ -50,6 +54,7 @@ private:
     QColor      PointsColor;
     QSize       WindowSize;
 
+    QPoint      LastPos;
     GLfloat     dx;
     GLfloat     dy;
     GLfloat     Zoom;

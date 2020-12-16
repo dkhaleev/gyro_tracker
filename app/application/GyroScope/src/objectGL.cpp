@@ -4,7 +4,7 @@
 ObjectOpenGL::ObjectOpenGL(QWidget *parent):
   QGLWidget(parent){
   // Init colors
-  BackgroundColor = QColor::fromRgb(50, 50, 100);
+  BackgroundColor = QColor::fromRgb(128, 128, 128);
   X_AxisColor = QColor::fromRgb(255, 65, 65, 128);   //Red. X-axis color
   Y_AxisColor = QColor::fromRgb(65, 255, 65, 128);   //Green. Y-axis color
   Z_AxisColor = QColor::fromRgb(65, 65, 128, 128);   //Blue. Z-axis color
@@ -14,7 +14,8 @@ ObjectOpenGL::ObjectOpenGL(QWidget *parent):
   angle_x=angle_y=angle_z=0;
   ax=ay=az=gx=gy=gz=mx=my=mz=0;
 
-  TopView();
+//  TopView();
+  IsometricView();
 
   QTextStream(stdout) << "objectGL \r\n";
 
@@ -38,7 +39,7 @@ void ObjectOpenGL::initializeGL()
 }
 
 void ObjectOpenGL::TopView(){
-  SetXRotation(-90*16); //change me
+  SetXRotation(-90*16); //@TBDL: change me
   SetYRotation(0);
   SetZRotation(0);
   Zoom = 0.5;
@@ -46,6 +47,14 @@ void ObjectOpenGL::TopView(){
 
 }
 
+void ObjectOpenGL::IsometricView()
+{
+    SetXRotation(62*16); //@TBDL: change me
+    SetYRotation(0); //-45*16);
+    SetZRotation(45*16);
+    Zoom=0.5;
+    dx=dy=0;
+}
 
 // Update the rotation around X if necessary
 void ObjectOpenGL::SetXRotation(int angle)
@@ -159,13 +168,57 @@ void ObjectOpenGL::Draw_Box()
     glPopMatrix();
 
 
-    // Bottom
+    // Bottom. Blue
     glBegin(GL_POLYGON);
-    qglColor(QColor::fromRgb(0,0,255,128)); //bottom blue
+    qglColor(QColor::fromRgb(0,0,255,128));
     glVertex3d(-0.8 ,-0.5   ,-0.2);
     glVertex3d(-0.8 ,0.5    ,-0.2);
     glVertex3d(0.8  ,0.5    ,-0.2);
     glVertex3d(0.8  ,-0.5   ,-0.2);
+    glEnd();
+
+    // Top. Green
+    glBegin(GL_POLYGON);
+    qglColor(QColor::fromRgb(0,255,0,128));
+    glVertex3d(-0.8 ,-0.5   ,0.2);
+    glVertex3d(0.8  ,-0.5   ,0.2);
+    glVertex3d(0.8  ,0.5    ,0.2);
+    glVertex3d(-0.8 ,0.5    ,0.2);
+    glEnd();
+
+    //Front. Red
+    glBegin(GL_POLYGON);
+    qglColor(QColor::fromRgb(255,0,0,128));
+    glVertex3d(0.8  ,-0.5    ,0.2);
+    glVertex3d(0.8  ,-0.5    ,-0.2);
+    glVertex3d(0.8  ,0.5     ,-0.2);
+    glVertex3d(0.8  ,0.5     ,0.2);
+    glEnd();
+
+    //Yellow. Back
+    glBegin(GL_POLYGON);
+    qglColor(QColor::fromRgb(255,255,0,128));
+    glVertex3d(-0.8  ,-0.5    ,0.2);
+    glVertex3d(-0.8  ,0.5     ,0.2);
+    glVertex3d(-0.8  ,0.5     ,-0.2);
+    glVertex3d(-0.8  ,-0.5    ,-0.2);
+    glEnd();
+
+    //Magenta. Left
+    glBegin(GL_POLYGON);
+    qglColor(QColor::fromRgb(255,0,255,128));
+    glVertex3d(-0.8  ,0.5    ,0.2);
+    glVertex3d(0.8   ,0.5     ,0.2);
+    glVertex3d(0.8   ,0.5     ,-0.2);
+    glVertex3d(-0.8  ,0.5    ,-0.2);
+    glEnd();
+
+    glBegin(GL_POLYGON);
+    qglColor(QColor::fromRgb(0,255,255,128));
+    glVertex3d(-0.8  ,-0.5    ,0.2);
+    glVertex3d(-0.8  ,-0.5    ,-0.2);
+    glVertex3d(0.8   ,-0.5     ,-0.2);
+    glVertex3d(0.8   ,-0.5     ,0.2);
     glEnd();
 
     //TBD Later
@@ -173,13 +226,77 @@ void ObjectOpenGL::Draw_Box()
 
 void ObjectOpenGL::Draw_Frame(){
   glLineWidth(10.0);
-  //X-axis
+  //X-axis vector
   glBegin(GL_LINES);
   qglColor(X_AxisColor);
   glVertex3d(0,0,0);
   glVertex3d(0.25,0,0);
   glEnd();
-  //@TBD Later
+
+  // Y-axis
+  glBegin(GL_LINES);
+  qglColor(Y_AxisColor);
+  glVertex3d(0,0,0);
+  glVertex3d(0, 0.25, 0);
+  glEnd();
+
+  // Z-axis
+  glBegin(GL_LINES);
+  qglColor(Z_AxisColor);
+  glVertex3d(0,0,0);
+  glVertex3d(0, 0, 0.25);
+  glEnd();
+}
+
+// The user has pressed a button
+// Memorizes the last mouse position
+void ObjectOpenGL::mousePressEvent(QMouseEvent *event){
+    // Right button (Rotate)
+    if(event->buttons()==Qt::RightButton)
+        LastPos = event->pos();
+    // Left button (Move)
+    if(event->buttons()==Qt::LeftButton)
+        LastPos = event->pos();
+}
+
+// Wheel event : Change the Zoom
+void ObjectOpenGL::wheelEvent(QWheelEvent *event)
+{
+
+    if(event->delta()<0)
+        Zoom/= 1-(event->delta()/120.0)/10.0;
+    if(event->delta()>0)
+        Zoom*= 1+(event->delta()/120.0)/10.0;
+}
+
+// Mouse move event
+// Update the view if necessary
+void ObjectOpenGL::mouseMoveEvent(QMouseEvent *event)
+{
+    // Left button : move
+    if(event->buttons()==Qt::LeftButton)
+    {
+        // Compute the difference with the previous position and scale to [-0.5 ; 0.5]
+        dx+= -(event->x() - LastPos.x() )/(double)WindowSize.width();
+        dy+= -(event->y() - LastPos.y() )/(double)WindowSize.height();
+        // Update the view according to the new position
+        //        resizeGL(WindowSize.width(),WindowSize.height());
+        LastPos = event->pos();
+    }
+
+    // Right button (Rotate)
+    if(event->buttons()==Qt::RightButton)
+    {
+        // Get the difference with the previous position
+        int dx_mouse = event->x() - LastPos.x();
+        int dy_mouse = event->y() - LastPos.y();
+        // Update the rotation
+        SetXRotation(xRot - 4 * dy_mouse);
+        SetYRotation(yRot + 4 * dx_mouse);
+
+        // Memorize previous position
+        LastPos = event->pos();
+    }
 }
 
 //Destructor
