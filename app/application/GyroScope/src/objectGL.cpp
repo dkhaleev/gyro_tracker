@@ -14,12 +14,10 @@ ObjectOpenGL::ObjectOpenGL(QWidget *parent):
   angle_x=angle_y=angle_z=0;
   ax=ay=az=gx=gy=gz=mx=my=mz=0;
 
-//  TopView();
   IsometricView();
-
-  QTextStream(stdout) << "objectGL \r\n";
-
 }
+
+
 
 // Initialize OpenGl
 void ObjectOpenGL::initializeGL()
@@ -38,22 +36,96 @@ void ObjectOpenGL::initializeGL()
     glEnable(GL_NORMALIZE);
 }
 
-void ObjectOpenGL::TopView(){
-  SetXRotation(-90*16); //@TBDL: change me
-  SetYRotation(0);
-  SetZRotation(0);
-  Zoom = 0.5;
-  dx=dy=0;
-
-}
-
-void ObjectOpenGL::IsometricView()
+// Redraw the openGl window
+void ObjectOpenGL::paintGL(  )
 {
-    SetXRotation(62*16); //@TBDL: change me
-    SetYRotation(0); //-45*16);
-    SetZRotation(45*16);
-    Zoom=0.5;
-    dx=dy=0;
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+
+    // Set the lights
+    GLfloat LightAmbient[]={0.4f,0.4f,0.4f,1.0f};
+    GLfloat LightDiffuse[]={0.8f,0.8f,0.8f,1.0f};
+    glLightfv(GL_LIGHT0,GL_AMBIENT,LightAmbient);
+    glLightfv(GL_LIGHT0,GL_DIFFUSE,LightDiffuse);
+    int LightPos[4]={0,0,10,1};
+    glLightiv(GL_LIGHT0,GL_POSITION,LightPos);
+
+    // Move the display according to the current orientation
+    glRotated(xRot / 16.0, 1.0, 0.0, 0.0);
+    glRotated(yRot / 16.0, 0.0, 1.0, 0.0);
+    glRotated(zRot / 16.0, 0.0, 0.0, 1.0);
+
+    glDisable(GL_LIGHTING);
+
+    // Invert the Y-axis for an orthonormal frame
+    glScalef(1,-1,1);
+
+    // Draw the frame
+//    Draw_Frame();
+
+    // Start display of the items
+    glPushMatrix();                                             // The following properties are only for the object
+
+
+
+    // Zoom according to the view's parameters
+    glScalef(Zoom,Zoom,Zoom);                                        // ReZoom the object
+
+
+    // Light independant (color is constant)
+
+    glLineWidth(5.0);
+
+#define RAW_ACC
+#define RAW_GYRO
+#define RAW_MAG
+
+#ifdef RAW_ACC
+    // Accelerometer
+    glBegin(GL_LINES);
+    qglColor(QColor::fromRgb(255 ,51 ,255)); //magenta
+    glVertex3d(0,0,0);
+    glVertex3d(ax,ay,az);
+    glEnd();
+#endif
+
+#ifdef RAW_GYRO
+    // Gyroscopes
+    glBegin(GL_LINES);
+    qglColor(QColor::fromRgb(255,255 ,0));
+    glVertex3d(0,0,0);
+    glVertex3d(gx,gy,gz);
+    glEnd();
+#endif
+
+#ifdef RAW_MAG
+    // Magnetometer
+    glBegin(GL_LINES);
+    qglColor(QColor::fromRgb(32,32,32));
+    glVertex3d(0,0,0);
+    glVertex3d(mx,my,mz);
+    glEnd();
+#endif
+    Draw_Box();
+
+    glEnable(GL_LIGHTING);                  // Re enable the light
+
+
+    // End of the object
+    glPopMatrix();
+
+
+    // Update the view
+    glViewport(0, 0,WindowSize.width(), WindowSize.height());
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    GLfloat Ratio=(GLfloat)WindowSize.width()/(GLfloat)WindowSize.height();
+    glOrtho((-0.5+dx)*Ratio,
+            ( 0.5+dx)*Ratio ,
+            +0.5+dy,
+            -0.5+dy,
+            -1500.0, 1500.0);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 // Update the rotation around X if necessary
@@ -79,7 +151,6 @@ void ObjectOpenGL::SetYRotation(int angle)
         updateGL();
     }
 }
-
 
 // Update the rotation around Z if necessary
 void ObjectOpenGL::SetZRotation(int angle)
@@ -109,50 +180,6 @@ void ObjectOpenGL::resizeGL(int width, int height)
     WindowSize=QSize(width,height);
 }
 
-// Redraw the openGl window
-void ObjectOpenGL::paintGL(  )
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-
-    // Set the lights
-    GLfloat LightAmbient[]={0.4f,0.4f,0.4f,1.0f};
-    GLfloat LightDiffuse[]={0.8f,0.8f,0.8f,1.0f};
-    glLightfv(GL_LIGHT0,GL_AMBIENT,LightAmbient);
-    glLightfv(GL_LIGHT0,GL_DIFFUSE,LightDiffuse);
-    int LightPos[4]={0,0,10,1};
-    glLightiv(GL_LIGHT0,GL_POSITION,LightPos);
-
-    // Move the display according to the current orientation
-    glRotated(xRot / 16.0, 1.0, 0.0, 0.0);
-    glRotated(yRot / 16.0, 0.0, 1.0, 0.0);
-    glRotated(zRot / 16.0, 0.0, 0.0, 1.0);
-
-    glDisable(GL_LIGHTING);
-
-    // Invert the Y-axis for an orthonormal frame
-    glScalef(1,-1,1);
-
-    // Draw the frame
-    //    Draw_Frame();
-
-    // Start display of the items
-    glPushMatrix();                                             // The following properties are only for the object
-
-    // Zoom according to the view's parameters
-    glScalef(Zoom,Zoom,Zoom);                                        // ReZoom the object
-
-
-    // Light independant (color is constant)
-
-    glLineWidth(5.0);
-
-    //@TBD Later: visualize vectors
-
-    Draw_Box();
-    //@TBD Later
-}
-
 void ObjectOpenGL::Draw_Box()
 {
 
@@ -170,7 +197,7 @@ void ObjectOpenGL::Draw_Box()
 
     // Bottom. Blue
     glBegin(GL_POLYGON);
-    qglColor(QColor::fromRgb(0,0,255,128));
+    qglColor(QColor::fromRgb(0,0,255,128)); //bottom blue
     glVertex3d(-0.8 ,-0.5   ,-0.2);
     glVertex3d(-0.8 ,0.5    ,-0.2);
     glVertex3d(0.8  ,0.5    ,-0.2);
@@ -179,23 +206,23 @@ void ObjectOpenGL::Draw_Box()
 
     // Top. Green
     glBegin(GL_POLYGON);
-    qglColor(QColor::fromRgb(0,255,0,128));
+    qglColor(QColor::fromRgb(0,255,0,128)); //top green
     glVertex3d(-0.8 ,-0.5   ,0.2);
     glVertex3d(0.8  ,-0.5   ,0.2);
     glVertex3d(0.8  ,0.5    ,0.2);
     glVertex3d(-0.8 ,0.5    ,0.2);
     glEnd();
 
-    //Front. Red
+//    Front. Red
     glBegin(GL_POLYGON);
-    qglColor(QColor::fromRgb(255,0,0,128));
+    qglColor(QColor::fromRgb(255,0,0,128)); //front red
     glVertex3d(0.8  ,-0.5    ,0.2);
     glVertex3d(0.8  ,-0.5    ,-0.2);
     glVertex3d(0.8  ,0.5     ,-0.2);
     glVertex3d(0.8  ,0.5     ,0.2);
     glEnd();
 
-    //Yellow. Back
+//    Magenta. Left
     glBegin(GL_POLYGON);
     qglColor(QColor::fromRgb(255,255,0,128));
     glVertex3d(-0.8  ,-0.5    ,0.2);
@@ -204,7 +231,7 @@ void ObjectOpenGL::Draw_Box()
     glVertex3d(-0.8  ,-0.5    ,-0.2);
     glEnd();
 
-    //Magenta. Left
+//    Cyan. Right
     glBegin(GL_POLYGON);
     qglColor(QColor::fromRgb(255,0,255,128));
     glVertex3d(-0.8  ,0.5    ,0.2);
@@ -221,36 +248,70 @@ void ObjectOpenGL::Draw_Box()
     glVertex3d(0.8   ,-0.5     ,0.2);
     glEnd();
 
-    //TBD Later
+    qglColor(QColor::fromRgb(255,255,255,255));
+    glPointSize(10.0);
+
+    glBegin(GL_POINTS);
+    glVertex3d(-0.8 ,-0.5   ,-0.2);
+    glVertex3d(-0.8 ,0.5    ,-0.2);
+    glVertex3d(0.8  ,0.5    ,-0.2);
+    glVertex3d(0.8  ,-0.5   ,-0.2);
+    glVertex3d(-0.8 ,-0.5   ,0.2);
+    glVertex3d(-0.8 ,0.5    ,0.2);
+    glVertex3d(0.8  ,0.5    ,0.2);
+    glVertex3d(0.8  ,-0.5   ,0.2);
+    glEnd();
+
+    glPopMatrix();
 }
 
-void ObjectOpenGL::Draw_Frame(){
-  glLineWidth(10.0);
-  //X-axis vector
-  glBegin(GL_LINES);
-  qglColor(X_AxisColor);
-  glVertex3d(0,0,0);
-  glVertex3d(0.25,0,0);
-  glEnd();
-
-  // Y-axis
-  glBegin(GL_LINES);
-  qglColor(Y_AxisColor);
-  glVertex3d(0,0,0);
-  glVertex3d(0, 0.25, 0);
-  glEnd();
-
-  // Z-axis
-  glBegin(GL_LINES);
-  qglColor(Z_AxisColor);
-  glVertex3d(0,0,0);
-  glVertex3d(0, 0, 0.25);
-  glEnd();
+// Draw the frame (X,Y and Z axis)
+void ObjectOpenGL::Draw_Frame()
+{
+    glLineWidth(10.0);
+    // X-axis
+    glBegin(GL_LINES);
+    qglColor(X_AxisColor);
+    glVertex3d(0,0,0);
+    glVertex3d(0.25, 0, 0);
+    glEnd();
+    // Y-axis
+    glBegin(GL_LINES);
+    qglColor(Y_AxisColor);
+    glVertex3d(0,0,0);
+    glVertex3d(0, 0.25, 0);
+    glEnd();
+    // Z-axis
+    glBegin(GL_LINES);
+    qglColor(Z_AxisColor);
+    glVertex3d(0,0,0);
+    glVertex3d(0, 0, 0.25);
+    glEnd();
 }
+
+void ObjectOpenGL::IsometricView()
+{
+    SetXRotation(62*16);
+    SetYRotation(0); //-45*16);
+    SetZRotation(45*16);
+    Zoom=0.5;
+    dx=dy=0;
+}
+
+void ObjectOpenGL::TopView()
+{
+    SetXRotation(-90*16);
+    SetYRotation(0);
+    SetZRotation(0);
+    Zoom=0.5;
+   dx=dy=0;
+}
+
 
 // The user has pressed a button
 // Memorizes the last mouse position
 void ObjectOpenGL::mousePressEvent(QMouseEvent *event){
+  std::cout << "Mouse Press event" << std::endl;
     // Right button (Rotate)
     if(event->buttons()==Qt::RightButton)
         LastPos = event->pos();
@@ -259,14 +320,15 @@ void ObjectOpenGL::mousePressEvent(QMouseEvent *event){
         LastPos = event->pos();
 }
 
+
 // Wheel event : Change the Zoom
 void ObjectOpenGL::wheelEvent(QWheelEvent *event)
 {
-
     if(event->delta()<0)
         Zoom/= 1-(event->delta()/120.0)/10.0;
     if(event->delta()>0)
         Zoom*= 1+(event->delta()/120.0)/10.0;
+    updateGL();
 }
 
 // Mouse move event
@@ -280,7 +342,7 @@ void ObjectOpenGL::mouseMoveEvent(QMouseEvent *event)
         dx+= -(event->x() - LastPos.x() )/(double)WindowSize.width();
         dy+= -(event->y() - LastPos.y() )/(double)WindowSize.height();
         // Update the view according to the new position
-        //        resizeGL(WindowSize.width(),WindowSize.height());
+//                resizeGL(WindowSize.width(),WindowSize.height());
         LastPos = event->pos();
     }
 
@@ -297,9 +359,13 @@ void ObjectOpenGL::mouseMoveEvent(QMouseEvent *event)
         // Memorize previous position
         LastPos = event->pos();
     }
+
+    updateGL();
 }
 
-//Destructor
-ObjectOpenGL::~ObjectOpenGL(){
-  makeCurrent();
+// Destructor
+ObjectOpenGL::~ObjectOpenGL()
+{
+    makeCurrent();
 }
+

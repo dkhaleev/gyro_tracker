@@ -52,8 +52,8 @@ private:
     QColor      Y_AxisColor;
     QColor      Z_AxisColor;
     QColor      PointsColor;
-    QSize       WindowSize;
 
+    QSize       WindowSize;
     QPoint      LastPos;
     GLfloat     dx;
     GLfloat     dy;
