@@ -154,20 +154,36 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
   glShadeModel(GL_FLAT);
 
   glBegin(GL_POLYGON); //front XY-polygon
-  qglColor(QColor::fromRgb(50, 50, 50, 128));
+  qglColor(X_GridColor);
   glVertex3d(0.0, 0.0, 0.0);
   glVertex3d(1.0, 0.0, 0.0);
   glVertex3d(1.0, 1.0, 0.0);
   glVertex3d(0.0, 1.0, 0.0);
   glEnd();
 
-  glBegin(GL_POLYGON); //reverse XY-polygon
-  qglColor(QColor::fromRgb(60, 60, 60, 128));
-  glVertex3d(0.0, 1.0, 0.0);
-  glVertex3d(1.0, 1.0, 0.0);
-  glVertex3d(1.0, 0.0, 0.0);
+  glBegin(GL_POLYGON); //front YZ-polygon
+  qglColor(Y_GridColor);
   glVertex3d(0.0, 0.0, 0.0);
+  glVertex3d(0.0, 1.0, 0.0);
+  glVertex3d(0.0, 1.0, 1.0);
+  glVertex3d(0.0, 0.0, 1.0);
   glEnd();
+
+  glBegin(GL_POLYGON); //front ZX-polygon
+  qglColor(Z_GridColor);
+  glVertex3d(0.0, 0.0, 0.0);
+  glVertex3d(0.0, 0.0, 1.0);
+  glVertex3d(1.0, 0.0, 1.0);
+  glVertex3d(1.0, 0.0, 0.0);
+  glEnd();
+
+//  glBegin(GL_POLYGON); //reverse XY-polygon
+//  qglColor(QColor::fromRgb(60, 60, 60, 128));
+//  glVertex3d(0.0, 1.0, 0.0);
+//  glVertex3d(1.0, 1.0, 0.0);
+//  glVertex3d(1.0, 0.0, 0.0);
+//  glVertex3d(0.0, 0.0, 0.0);
+//  glEnd();
 
   glEndList();
 
@@ -441,8 +457,8 @@ void ObjectOpenGL::mouseMoveEvent(QMouseEvent *event)
     if(event->buttons()==Qt::LeftButton)
     {
         // Compute the difference with the previous position and scale to [-0.5 ; 0.5]
-        dx+= -(event->x() - LastPos.x() )/(double)WindowSize.width();
-        dy+= -(event->y() - LastPos.y() )/(double)WindowSize.height();
+        dx+= -(event->x() - LastPos.x() ) / (double)WindowSize.width();
+        dy+= -(event->y() - LastPos.y() ) / (double)WindowSize.height();
         // Update the view according to the new position
 //                resizeGL(WindowSize.width(),WindowSize.height());
         LastPos = event->pos();
