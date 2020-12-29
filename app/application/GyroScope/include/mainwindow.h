@@ -59,6 +59,7 @@ private:
   QMenu *fileMenu;
   QMenu *viewMenu;
   QMenu *tabsMenu;
+  QMenu *viewportMenu;
   QMenu *paramsMenu;
   QMenu *portMenu;
   QMenu *baudrateMenu;

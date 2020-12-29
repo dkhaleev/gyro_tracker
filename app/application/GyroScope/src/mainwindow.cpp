@@ -25,13 +25,6 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   this->setWindowTitle("GyroScope");
   this->setContextMenuPolicy(Qt::NoContextMenu);
 
-  createActions();
-  createMenus();
-  createToolBars();
-
-  createStatusBar();
-  stateWasModified();
-
   QWidget *centralWidget = new QWidget(this);
 
   //  tabs routine
@@ -81,6 +74,12 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   timerArduino->connect(timerArduino, SIGNAL(timeout()),this, SLOT(onTimerReadData()));
   timerArduino->start(10);
 //  connect(console, SIGNAL(getData(QByteArray)), this, SLOT(writeData(QByteArray)));
+  createActions();
+  createMenus();
+  createToolBars();
+
+  createStatusBar();
+  stateWasModified();
 }
 
 void MainWindow::loadSettings()
@@ -147,13 +146,23 @@ void MainWindow::createActions(){
 void MainWindow::createMenus(){
   fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addSeparator();
-  fileMenu->addAction("Quit", qApp, SLOT (quit()), QKeySequence(tr("Ctrl+Q")));
+  fileMenu->addAction("&Quit", qApp, SLOT (quit()), QKeySequence(tr("Ctrl+Q")));
   fileMenu->addSeparator();
 
   //  View
   viewMenu = menuBar()->addMenu(tr("&View"));
 
-  tabsMenu = viewMenu->addMenu(tr("&Tabs"));    
+  tabsMenu = viewMenu->addMenu(tr("&Tabs"));
+
+  viewMenu->addSeparator();
+  viewportMenu = viewMenu->addMenu(tr("&Viewport"));
+  viewportMenu->addAction(tr("&Front View"),      objectGL, SLOT (FrontView()),     QKeySequence(tr("Ctrl+f")));
+  viewportMenu->addAction(tr("&Rear View"),       objectGL, SLOT (RearView()),      QKeySequence(tr("Ctrl+r")));
+  viewportMenu->addAction(tr("&Left View"),       objectGL, SLOT (LeftView()),      QKeySequence(tr("Ctrl+l")));
+  viewportMenu->addAction(tr("&Right View"),      objectGL, SLOT (RightView()),     QKeySequence(tr("Ctrl-r")));
+  viewportMenu->addAction(tr("&Top View"),        objectGL, SLOT (TopView()),       QKeySequence(tr("Ctrl+t")));
+  viewportMenu->addAction(tr("&Bottom View"),     objectGL, SLOT (BottomView()),    QKeySequence(tr("Ctrl+b")));
+  viewportMenu->addAction(tr("&Isometric View"),  objectGL, SLOT (IsometricView()), QKeySequence(tr("Ctrl+i")));
 
   tabsMenu->addAction(generalAction);
   tabsMenu->addAction(graphsAction);

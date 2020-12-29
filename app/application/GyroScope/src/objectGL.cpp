@@ -8,13 +8,22 @@ ObjectOpenGL::ObjectOpenGL(QWidget *parent):
   X_AxisColor = QColor::fromRgb(255, 65, 65, 128);   //Red. X-axis color
   Y_AxisColor = QColor::fromRgb(65, 255, 65, 128);   //Green. Y-axis color
   Z_AxisColor = QColor::fromRgb(65, 65, 128, 128);   //Blue. Z-axis color
+
+  X_GridColor = QColor::fromRgb(255, 0, 0, 128); //solid Red
+  Y_GridColor = QColor::fromRgb(0, 255, 0, 128); //solid Green
+  Z_GridColor = QColor::fromRgb(0, 0, 255, 120); //solid Blue
+  GridMeshColor = QColor::fromRgb(10, 10, 10, 128); //dark gray
+  GridPlaneColor = QColor::fromRgb(250, 250, 250, 128); //shaded white
+
   PointsColor = QColor::fromRgb(128, 128, 128, 128); //Gray. Points color
 
   //set initial angles value
   angle_x=angle_y=angle_z=0;
   ax=ay=az=gx=gy=gz=mx=my=mz=0;
 
-  IsometricView();
+//  IsometricView();
+  TopView();
+
 }
 
 
@@ -23,6 +32,10 @@ ObjectOpenGL::ObjectOpenGL(QWidget *parent):
 void ObjectOpenGL::initializeGL()
 {
     // Intitialize Open GL
+  static const GLfloat reflectanceX[4] = { 0.8f, 0.1f, 0.0f, 1.0f };
+  static const GLfloat reflectanceY[4] = { 0.0f, 0.8f, 0.2f, 1.0f };
+  static const GLfloat reflectanceZ[4] = { 0.2f, 0.2f, 1.0f, 1.0f };
+
     qglClearColor(BackgroundColor);                            // Set backGround color
     glShadeModel(GL_FLAT);
     glEnable(GL_DEPTH_TEST);                                    // Depth buffer enabled (Hide invisible items)
@@ -33,6 +46,9 @@ void ObjectOpenGL::initializeGL()
     glEnable(GL_COLOR_MATERIAL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);          // For transparency
     glColorMaterial(GL_FRONT,GL_DIFFUSE);
+
+    planeX = makePlane(reflectanceX);
+
     glEnable(GL_NORMALIZE);
 }
 
@@ -110,6 +126,7 @@ void ObjectOpenGL::paintGL(  )
 
     glEnable(GL_LIGHTING);                  // Re enable the light
 
+    drawPlane(planeX, dx, dy, dz, 0);
 
     // End of the object
     glPopMatrix();
@@ -126,6 +143,44 @@ void ObjectOpenGL::paintGL(  )
             -0.5+dy,
             -1500.0, 1500.0);
     glMatrixMode(GL_MODELVIEW);
+}
+
+GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
+  std::cout << "Make Plane called"<<std::endl;
+  GLuint list = glGenLists(1);
+  glNewList(list, GL_COMPILE);
+  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance);
+
+  glShadeModel(GL_FLAT);
+
+  glBegin(GL_POLYGON); //front XY-polygon
+  qglColor(QColor::fromRgb(50, 50, 50, 128));
+  glVertex3d(0.0, 0.0, 0.0);
+  glVertex3d(1.0, 0.0, 0.0);
+  glVertex3d(1.0, 1.0, 0.0);
+  glVertex3d(0.0, 1.0, 0.0);
+  glEnd();
+
+  glBegin(GL_POLYGON); //reverse XY-polygon
+  qglColor(QColor::fromRgb(60, 60, 60, 128));
+  glVertex3d(0.0, 1.0, 0.0);
+  glVertex3d(1.0, 1.0, 0.0);
+  glVertex3d(1.0, 0.0, 0.0);
+  glVertex3d(0.0, 0.0, 0.0);
+  glEnd();
+
+  glEndList();
+
+  return list;
+}
+
+void ObjectOpenGL::drawPlane(GLuint plane, GLdouble dx, GLdouble dy, GLdouble dz, GLdouble angle){
+  std::cout << "DrawPlane called" << std::endl;
+  glPushMatrix();
+  glTranslated(dx, dy, dz);
+  glRotated(angle, 0.0, 0.0, 1.0);
+  glCallList(plane);
+  glPopMatrix();
 }
 
 // Update the rotation around X if necessary
@@ -289,12 +344,40 @@ void ObjectOpenGL::Draw_Frame()
     glEnd();
 }
 
-void ObjectOpenGL::IsometricView()
+void ObjectOpenGL::FrontView()
 {
-    SetXRotation(62*16);
-    SetYRotation(0); //-45*16);
-    SetZRotation(45*16);
-    Zoom=0.5;
+    SetXRotation(0);
+    SetYRotation(0);
+    SetZRotation(0);
+    Zoom=1;
+    dx=dy=0;
+
+}
+
+void ObjectOpenGL::RearView()
+{
+    SetXRotation(0);
+    SetYRotation(180*16);
+    SetZRotation(0);
+    Zoom=1;
+    dx=dy=0;
+}
+
+void ObjectOpenGL::LeftView()
+{
+    SetXRotation(0);
+    SetYRotation(90*16);
+    SetZRotation(0);
+    Zoom=1;
+    dx=dy=0;
+}
+
+void ObjectOpenGL::RightView()
+{
+    SetXRotation(0);
+    SetYRotation(-90*16);
+    SetZRotation(0);
+    Zoom=1;
     dx=dy=0;
 }
 
@@ -305,6 +388,25 @@ void ObjectOpenGL::TopView()
     SetZRotation(0);
     Zoom=0.5;
    dx=dy=0;
+}
+
+void ObjectOpenGL::BottomView()
+{
+    SetXRotation(90*16);
+    SetYRotation(0);
+    SetZRotation(0);
+    Zoom=0.5;
+    dx=dy=0;
+}
+
+void ObjectOpenGL::IsometricView()
+{
+  std::cout << "Top View Caled" << std::endl;
+    SetXRotation(-90*16);
+    SetYRotation(0);
+    SetZRotation(0);
+    Zoom=0.5;
+    dx=dy=0;
 }
 
 

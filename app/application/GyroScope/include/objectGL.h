@@ -22,7 +22,12 @@ public:
     void setAngles(double anx, double any, double anz) {angle_x=anx; angle_y=any; angle_z=anz; }
 
 public slots:
-    void TopView(void);
+    void FrontView(void);                    // Standard view : front view
+    void RearView(void);                     // Standard view : read view
+    void LeftView(void);                     // Standard view : left view
+    void RightView(void);                    // Standard view : right view
+    void TopView(void);                      // Standard view : top view
+    void BottomView(void);                   // Standard view : bottom view
     void IsometricView(void);
 
     void SetXRotation(int angle);
@@ -47,16 +52,31 @@ private:
     void Draw_Box();
     void NormalizeAngle(int *angle);
 
+    GLuint      makePlane(const GLfloat *reflectance);
+    void        drawPlane(GLuint plane, GLdouble dx, GLdouble dy, GLdouble dz, GLdouble angle);
+    GLuint      planeX;
+    GLuint      planeY;
+    GLuint      planeZ;
+
     QColor      BackgroundColor;
     QColor      X_AxisColor;
     QColor      Y_AxisColor;
     QColor      Z_AxisColor;
+
+    QColor      X_GridColor;
+    QColor      Y_GridColor;
+    QColor      Z_GridColor;
+
+    QColor      GridMeshColor;
+    QColor      GridPlaneColor;
+
     QColor      PointsColor;
 
     QSize       WindowSize;
     QPoint      LastPos;
     GLfloat     dx;
     GLfloat     dy;
+    GLfloat     dz;
     GLfloat     Zoom;
     int         xRot;
     int         yRot;
