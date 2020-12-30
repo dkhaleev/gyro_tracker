@@ -191,10 +191,10 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
 }
 
 void ObjectOpenGL::drawPlane(GLuint plane, GLdouble dx, GLdouble dy, GLdouble dz, GLdouble angle){
-  std::cout << "DrawPlane called" << std::endl;
   glPushMatrix();
-  glTranslated(dx, dy, dz);
+
   glRotated(angle, 0.0, 0.0, 1.0);
+
   glCallList(plane);
   glPopMatrix();
 }
@@ -459,6 +459,10 @@ void ObjectOpenGL::mouseMoveEvent(QMouseEvent *event)
         // Compute the difference with the previous position and scale to [-0.5 ; 0.5]
         dx+= -(event->x() - LastPos.x() ) / (double)WindowSize.width();
         dy+= -(event->y() - LastPos.y() ) / (double)WindowSize.height();
+
+        std::cout << "dx: " << dx << " x: " << event->x() << " Last Pos X: " << LastPos.x() << std::endl;
+        std::cout << "dy: " << dy << " y: " << event->y() << " Last Pos Y: " << LastPos.y() << std::endl;
+        std::cout << "===================" << std::endl;
         // Update the view according to the new position
 //                resizeGL(WindowSize.width(),WindowSize.height());
         LastPos = event->pos();
