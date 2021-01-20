@@ -153,42 +153,56 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
 
   glShadeModel(GL_FLAT);
 
-  glBegin(GL_POLYGON); //front XY-polygon
-  qglColor(X_GridColor);
-  glVertex3d(0.0, 0.0, 0.0);
-  glVertex3d(1.0, 0.0, 0.0);
-  glVertex3d(1.0, 1.0, 0.0);
-  glVertex3d(0.0, 1.0, 0.0);
-  glEnd();
+  glLineWidth((GLfloat)0.2);
 
-  glBegin(GL_POLYGON); //front YZ-polygon
-  qglColor(Y_GridColor);
-  glVertex3d(0.0, 0.0, 0.0);
-  glVertex3d(0.0, 1.0, 0.0);
-  glVertex3d(0.0, 1.0, 1.0);
-  glVertex3d(0.0, 0.0, 1.0);
-  glEnd();
+  for (float i=0; i<5.0; i+=0.1){
+      //front XY-polygon
+      glBegin(GL_LINES);
+      qglColor(X_GridColor);
+      glVertex3d(i, 0.0, 0.0);
+      glVertex3d(i, 5.0, 0.0);
+      glEnd();
 
-  glBegin(GL_POLYGON); //front ZX-polygon
-  qglColor(Z_GridColor);
-  glVertex3d(0.0, 0.0, 0.0);
-  glVertex3d(0.0, 0.0, 1.0);
-  glVertex3d(1.0, 0.0, 1.0);
-  glVertex3d(1.0, 0.0, 0.0);
-  glEnd();
+      glBegin(GL_LINES);
+      qglColor(X_GridColor);
+      glVertex3d(0.0, i, 0.0);
+      glVertex3d(5.0, i, 0.0);
+      glEnd();
+    }
 
-//  glBegin(GL_POLYGON); //reverse XY-polygon
-//  qglColor(QColor::fromRgb(60, 60, 60, 128));
-//  glVertex3d(0.0, 1.0, 0.0);
-//  glVertex3d(1.0, 1.0, 0.0);
-//  glVertex3d(1.0, 0.0, 0.0);
-//  glVertex3d(0.0, 0.0, 0.0);
-//  glEnd();
+  for (float i=0; i<5.0; i+=0.1){
+      //fron YZ-polygon
+      glBegin(GL_LINES);
+      qglColor(Y_GridColor);
+      glVertex3d(0.0, i, 0.0);
+      glVertex3d(0.0, i, 5.0);
+      glEnd();
+
+      glBegin(GL_LINES);
+      qglColor(Y_GridColor);
+      glVertex3d(0.0, 0.0, i);
+      glVertex3d(0.0, 5.0, i);
+      glEnd();
+    }
+
+  for (float i=0; i<5.0; i+=0.1){
+      glBegin(GL_LINES);
+      qglColor(Z_GridColor);
+      glVertex3d(i, 0.0, 0.0);
+      glVertex3d(i, 0.0, 5.0);
+      glEnd();
+
+      glBegin(GL_LINES);
+      glVertex3d(0.0, 0.0, i);
+      glVertex3d(5.0, 0.0, i);
+      glEnd();
+    }
 
   glEndList();
 
   return list;
 }
+
 
 void ObjectOpenGL::drawPlane(GLuint plane, GLdouble dx, GLdouble dy, GLdouble dz, GLdouble angle){
   glPushMatrix();

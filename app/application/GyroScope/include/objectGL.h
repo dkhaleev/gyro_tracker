@@ -5,7 +5,6 @@
 #include <QtGui>
 #include <iostream>
 
-
 //using namespace std;
 
 class ObjectOpenGL : public QGLWidget
@@ -54,6 +53,7 @@ private:
 
     GLuint      makePlane(const GLfloat *reflectance);
     void        drawPlane(GLuint plane, GLdouble dx, GLdouble dy, GLdouble dz, GLdouble angle);
+
     GLuint      planeX;
     GLuint      planeY;
     GLuint      planeZ;
