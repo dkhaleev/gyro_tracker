@@ -21,11 +21,19 @@ ObjectOpenGL::ObjectOpenGL(QWidget *parent):
   angle_x=angle_y=angle_z=0;
   ax=ay=az=gx=gy=gz=mx=my=mz=0;
 
-//  IsometricView();
-  TopView();
+  IsometricView();
+//  TopView();
 
+  QFont dfont("Arial", 40);
+  TextGL *textGL = new TextGL();
+  textGL->setFont(dfont);
+  setTextGL(*textGL);
 }
 
+void ObjectOpenGL::setTextGL(TextGL &textObj){
+  textGL = textObj;
+  QTextStream(stdout) << "set TextGL \r\n";
+}
 
 
 // Initialize OpenGl
@@ -171,7 +179,7 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
     }
 
   for (float i=0; i<5.0; i+=0.1){
-      //fron YZ-polygon
+      //front YZ-polygon
       glBegin(GL_LINES);
       qglColor(Y_GridColor);
       glVertex3d(0.0, i, 0.0);
@@ -186,6 +194,7 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
     }
 
   for (float i=0; i<5.0; i+=0.1){
+      //front ZX-polygon
       glBegin(GL_LINES);
       qglColor(Z_GridColor);
       glVertex3d(i, 0.0, 0.0);
@@ -197,6 +206,21 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glVertex3d(5.0, 0.0, i);
       glEnd();
     }
+
+  QPainterPath path;
+  glDisable(GL_LIGHTING);
+  QFont font("Arial", 40);
+  path.addText(QPointF(0, 0), QFont("Arial", 40), QString(tr("This is a test")));
+  QList<QPolygonF> poly = path.toSubpathPolygons();
+  for (QList<QPolygonF>::iterator i = poly.begin(); i != poly.end(); i++){
+      glBegin(GL_LINE_LOOP);
+      for (QPolygonF::iterator p = (*i).begin(); p != i->end(); p++)
+          glVertex3f(p->rx()*0.1f, -p->ry()*0.1f, 0);
+      glEnd();
+  }
+  glEnable(GL_LIGHTING);
+  //end text drawing
+
 
   glEndList();
 
@@ -267,7 +291,7 @@ void ObjectOpenGL::resizeGL(int width, int height)
 
 void ObjectOpenGL::Draw_Box()
 {
-
+    /*
     glPushMatrix();
 
     glRotated(angle_z , 0.0, 0.0, 1.0);
@@ -348,6 +372,7 @@ void ObjectOpenGL::Draw_Box()
     glEnd();
 
     glPopMatrix();
+    */
 }
 
 // Draw the frame (X,Y and Z axis)
@@ -417,7 +442,7 @@ void ObjectOpenGL::TopView()
     SetYRotation(0);
     SetZRotation(0);
     Zoom=0.5;
-   dx=dy=0;
+    dx=dy=0;
 }
 
 void ObjectOpenGL::BottomView()

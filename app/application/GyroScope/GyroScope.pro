@@ -39,7 +39,9 @@ SOURCES += \
         src/objectGL.cpp \
         src/qcustomplot.cpp \
         src/rOc_serial.cpp \
-        src/rOc_timer.cpp
+        src/rOc_timer.cpp \
+        src/text3d.cpp \
+        src/textGL.cpp
 
 HEADERS += \
         include/console.h \
@@ -53,7 +55,9 @@ HEADERS += \
         include/qcustomplot.h \
         include/rOc_serial.h \
         include/rOc_timer.h \
-        include/consoleTab.h
+        include/consoleTab.h \
+        include/text3d.h \
+        include/textGL.h
 
 FORMS += \
         ui/mainwindow.ui
