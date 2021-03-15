@@ -163,7 +163,7 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
 
   glLineWidth((GLfloat)0.2);
 
-  for (float i=0; i<5.0; i+=0.1){
+  for (float i=0; i<5.0; i+=0.2){
       //front XY-polygon
       glBegin(GL_LINES);
       qglColor(X_GridColor);
@@ -178,7 +178,7 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glEnd();
     }
 
-  for (float i=0; i<5.0; i+=0.1){
+  for (float i=0; i<5.0; i+=0.2){
       //front YZ-polygon
       glBegin(GL_LINES);
       qglColor(Y_GridColor);
@@ -193,7 +193,7 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glEnd();
     }
 
-  for (float i=0; i<5.0; i+=0.1){
+  for (float i=0; i<5.0; i+=0.2){
       //front ZX-polygon
       glBegin(GL_LINES);
       qglColor(Z_GridColor);
@@ -207,19 +207,9 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glEnd();
     }
 
-  QPainterPath path;
-  glDisable(GL_LIGHTING);
-  QFont font("Arial", 40);
-  path.addText(QPointF(0, 0), QFont("Arial", 40), QString(tr("This is a test")));
-  QList<QPolygonF> poly = path.toSubpathPolygons();
-  for (QList<QPolygonF>::iterator i = poly.begin(); i != poly.end(); i++){
-      glBegin(GL_LINE_LOOP);
-      for (QPolygonF::iterator p = (*i).begin(); p != i->end(); p++)
-          glVertex3f(p->rx()*0.1f, -p->ry()*0.1f, 0);
-      glEnd();
-  }
-  glEnable(GL_LIGHTING);
-  //end text drawing
+  textGL.setFont(QFont("Arial", 10));
+  textGL.setString(QString(tr("Another test")));
+  textGL.renderText();
 
 
   glEndList();

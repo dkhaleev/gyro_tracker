@@ -1,7 +1,8 @@
 #ifndef TEXTGL_H
 #define TEXTGL_H
 #include <QTextStream>
-
+#include <QPainter>
+#include <QGLWidget>
 #include <qfont.h>
 
 class TextGL {
@@ -9,7 +10,7 @@ class TextGL {
     TextGL();
     ~TextGL();
 
-    void setFont(QFont &font);
+    void setFont(QFont font);
     void setString(QString textString);
     void setPlane(QString plane="xy");
     void setZeroPoint(float x=0, float y=0, float z=0);
@@ -19,8 +20,8 @@ class TextGL {
     void renderText();
 
   private:
-    QFont* font;
-    QString* textString;
+    QFont font;
+    QString textString;
     QString* plane;
     float* zeroX;
     float* zeroY;
@@ -28,6 +29,7 @@ class TextGL {
     float* height;
     float* thickness;
     QColor* fontColor;
+    QPainterPath* path;
 
 };
 
