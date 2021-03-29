@@ -207,7 +207,8 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glEnd();
     }
 
-  textGL.setFont(QFont("Arial", 10));
+  textGL.setFont(QFont("Arial", 2));
+  textGL.setZeroPoint(0.0f, 0.0f, 0.0f);
   textGL.setString(QString(tr("Another test")));
   textGL.renderText();
 

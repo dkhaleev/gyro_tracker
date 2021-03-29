@@ -4,8 +4,8 @@
 #include <QGLWidget>
 #include <QtGui>
 #include <iostream>
-#include "text3d.h"
 #include <textGL.h>
+
 
 //using namespace std;
 
@@ -93,7 +93,6 @@ private:
     //Euler angles
     double angle_x, angle_y, angle_z;
 
-    Text3D    text3d;
 
     void setTextGL(TextGL &textGL);
 

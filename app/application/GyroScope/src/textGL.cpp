@@ -76,18 +76,8 @@ void TextGL::setColour(QColor &fontColor){
 void TextGL::renderText(){
   QTextStream(stdout) << "TextGL: Render Text \r\n";
   QPainterPath path;
-  path.addText(QPointF(0, 0), this->font, this->textString);
+  path.addText(QPointF(0.0f, 0.0f), this->font, this->textString);
 
-  //---contour--------
-//  QList<QPolygonF> poly = path.toSubpathPolygons();
-//  for (QList<QPolygonF>::iterator i = poly.begin(); i != poly.end(); i++){
-//      glBegin(GL_LINE_LOOP);
-//      for (QPolygonF::iterator p = (*i).begin(); p != i->end(); p++)
-//          glVertex3f(p->rx()*0.1f, -p->ry()*0.1f, 0);
-//      glEnd();
-//  }
-
-  //-------single sided tesselated poly--------
   GLuint id = glGenLists(1);
   GLUtesselator *tess = gluNewTess();
 
@@ -106,6 +96,15 @@ void TextGL::renderText(){
   for (QList<QPolygonF>::iterator it = poly.begin(); it != poly.end(); it++) {
       elements= (*it).size();
   }
+
+  glEnable(GL_DEPTH_TEST);
+  glMatrixMode(GL_MODELVIEW); // To operate on model-view matrix
+//  glLoadIdentity(); // Reset the model-view matrix
+  glTranslatef(0.0f, 0.0f, -0.00f); // Move right and into the screen
+
+  GLdouble rot = 0.0f;
+  glRotatef(rot, 0.0f, 0.0f, 0.0f);
+
 
   glCullFace(GL_FRONT);
   glEnable(GL_CULL_FACE);
@@ -167,6 +166,8 @@ void TextGL::renderText(){
   gluTessEndPolygon(tess);
   glEndList();
   gluDeleteTess(tess);
+
+  glDisable(GL_DEPTH_TEST);
 
 }
 
