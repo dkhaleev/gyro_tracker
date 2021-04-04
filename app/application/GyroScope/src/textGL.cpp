@@ -62,6 +62,7 @@ void TextGL::setColour(QColor &fontColor){
 }
 
 GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, float z){
+  y = 0 - y; //invert Y because of tesselator mirroring
   QTextStream(stdout) << "TextGL: Render Text: " << textString << "\r\n";
   QPainterPath path;
   path.addText(QPointF(x, y), this->font, textString);

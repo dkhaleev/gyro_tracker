@@ -179,9 +179,11 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glVertex3d(0.0, i, 0.0);
       glVertex3d(5.0, i, 0.0);
       glEnd();
-
-      list = textGL.renderText(list, QString("t"), 5.0f, i, 0.0f);
     }
+
+  list = textGL.renderText(list, QString("a"), 5.0f, 0.0, 0.0f);
+  list = textGL.renderText(list, QString("b"), 5.0f, 5.0, 0.0f);
+
 
 
   for (float i=0; i<5.0; i+=0.2){
