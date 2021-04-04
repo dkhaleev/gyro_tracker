@@ -134,6 +134,7 @@ void ObjectOpenGL::paintGL(  )
 
     glEnable(GL_LIGHTING);                  // Re enable the light
 
+
     drawPlane(planeX, dx, dy, dz, 0);
 
     // End of the object
@@ -163,6 +164,8 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
 
   glLineWidth((GLfloat)0.2);
 
+  textGL.setFont(QFont("Arial", 2));
+
   for (float i=0; i<5.0; i+=0.2){
       //front XY-polygon
       glBegin(GL_LINES);
@@ -176,7 +179,10 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glVertex3d(0.0, i, 0.0);
       glVertex3d(5.0, i, 0.0);
       glEnd();
+
+      list = textGL.renderText(list, QString("t"), 5.0f, i, 0.0f);
     }
+
 
   for (float i=0; i<5.0; i+=0.2){
       //front YZ-polygon
@@ -206,12 +212,6 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glVertex3d(5.0, 0.0, i);
       glEnd();
     }
-
-  textGL.setFont(QFont("Arial", 2));
-  textGL.setZeroPoint(0.0f, 0.0f, 0.0f);
-  textGL.setString(QString(tr("Another test")));
-  textGL.renderText();
-
 
   glEndList();
 
