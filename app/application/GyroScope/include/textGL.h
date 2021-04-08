@@ -12,10 +12,9 @@ class TextGL {
 
     void setFont(QFont font);
     void setPlane(QString plane="xy");
-    void setHeight(float height=1);
     void setThickness(float thickness=1);
     void setColour(QColor &fontColor);
-    GLuint renderText(GLuint list, QString textString, float x=0, float y=0, float z=0);
+    GLuint renderText(GLuint list, QString textString, float x=0, float y=0, float z=0, float scale=1);
 
   private:
     QFont font;
@@ -24,7 +23,6 @@ class TextGL {
     float* zeroX;
     float* zeroY;
     float* zeroZ;
-    float* height;
     float* thickness;
     QColor* fontColor;
     QPainterPath* path;

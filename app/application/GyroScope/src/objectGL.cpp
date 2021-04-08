@@ -166,7 +166,7 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
 
   textGL.setFont(QFont("Arial", 2));
 
-  for (float i=0; i<5.0; i+=0.2){
+  for (float i=0; i<=5.0; i+=0.2){
       //front XY-polygon
       glBegin(GL_LINES);
       qglColor(X_GridColor);
@@ -179,14 +179,15 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glVertex3d(0.0, i, 0.0);
       glVertex3d(5.0, i, 0.0);
       glEnd();
+
+      float b = (floor(i));
+      if ((int)(i*100) - (int)(b*100) == 0){
+          list = textGL.renderText(list, QString::number(i, 'f', 1), 5.0f, i, 0.0f, 0.08f);
+        }
     }
 
-  list = textGL.renderText(list, QString("a"), 5.0f, 0.0, 0.0f);
-  list = textGL.renderText(list, QString("b"), 5.0f, 5.0, 0.0f);
 
-
-
-  for (float i=0; i<5.0; i+=0.2){
+  for (float i=0; i<=5.0; i+=0.2){
       //front YZ-polygon
       glBegin(GL_LINES);
       qglColor(Y_GridColor);
@@ -199,9 +200,11 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
       glVertex3d(0.0, 0.0, i);
       glVertex3d(0.0, 5.0, i);
       glEnd();
+
+//      list = textGL.renderText(list, QString::number(i, 'f', 1), 0.0f, 5.0f, i, 0.08f);
     }
 
-  for (float i=0; i<5.0; i+=0.2){
+  for (float i=0; i<=5.0; i+=0.2){
       //front ZX-polygon
       glBegin(GL_LINES);
       qglColor(Z_GridColor);

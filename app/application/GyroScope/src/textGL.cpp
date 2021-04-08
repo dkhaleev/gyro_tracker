@@ -46,10 +46,6 @@ void TextGL::setPlane(QString plane){
   this->plane = &plane;
 }
 
-void TextGL::setHeight(float height){
-  QTextStream(stdout) << "TextGL: Set height: " << height << "\r\n";
-  this->height = &height;
-}
 
 void TextGL::setThickness(float thickness){
   QTextStream(stdout) << "TextGL: Set thickness: " << thickness << "\r\n";
@@ -61,11 +57,11 @@ void TextGL::setColour(QColor &fontColor){
   this->fontColor = &fontColor;
 }
 
-GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, float z){
+GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, float z, float scale){
   y = 0 - y; //invert Y because of tesselator mirroring
   QTextStream(stdout) << "TextGL: Render Text: " << textString << "\r\n";
   QPainterPath path;
-  path.addText(QPointF(x, y), this->font, textString);
+  path.addText(QPointF(0, 0), this->font, textString);
 
   GLUtesselator *tess = gluNewTess();
 
@@ -87,7 +83,7 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
   glEnable(GL_DEPTH_TEST);
   glMatrixMode(GL_MODELVIEW); // To operate on model-view matrix
 //  glLoadIdentity(); // Reset the model-view matrix
-//  glTranslatef(x, 0.0f, -0.00f); // Move right and into the screen
+//  glTranslatef(x, y, -0.00f); // Move right and into the screen
 
   GLdouble rot = 0.0f;
   glRotatef(rot, 0.0f, 0.0f, 0.0f);
@@ -102,9 +98,9 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
 
       for(int i=0; i<polygon.count(); i++){
           QPointF point = polygon.at(i);
-          vertices[i][0] = point.rx();
-          vertices[i][1] = -point.ry();
-          vertices[i][2] = 0.0f;
+          vertices[i][0] = (point.rx()*scale)+x;
+          vertices[i][1] = (-point.ry()*scale)-y;
+          vertices[i][2] = (0.0f*scale)+z;
         }
 
         gluTessBeginContour(tess);
@@ -123,9 +119,9 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
 
       for(int i=0; i<polygon.count(); i++){
           QPointF point = polygon.at(i);
-          vertices[i][0] = point.rx();
-          vertices[i][1] = -point.ry();
-          vertices[i][2] = -0.1f;
+          vertices[i][0] = (point.rx()*scale)+x;
+          vertices[i][1] = (-point.ry()*scale)-y;
+          vertices[i][2] = (-0.1f*scale)+z;
         }
 
         gluTessBeginContour(tess);
@@ -141,12 +137,12 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
           glBegin(GL_QUAD_STRIP);
           QPolygonF::iterator p;
           for (p = (*it).begin(); p != it->end(); p++) {
-              glVertex3f(p->rx(), -p->ry(), 0.0f);
-              glVertex3f(p->rx(), -p->ry(), -0.1f);
+              glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, 0.0f*scale);
+              glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, -0.1f*scale);
           }
           p = (*it).begin();
-          glVertex3f(p->rx(), -p->ry(), 0.0f); // draw the closing quad
-          glVertex3f(p->rx(), -p->ry(), -0.1f); // of the "wrapping"
+          glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, 0.0f*scale); // draw the closing quad
+          glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, -0.1f*scale); // of the "wrapping"
           glEnd();
       }
 
@@ -154,7 +150,6 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
   gluDeleteTess(tess);
 
   glDisable(GL_DEPTH_TEST);
-
   return list;
 }
 
