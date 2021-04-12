@@ -55,7 +55,9 @@ void ObjectOpenGL::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);          // For transparency
     glColorMaterial(GL_FRONT,GL_DIFFUSE);
 
-    planeX = makePlane(reflectanceX);
+    planeX = makePlane(reflectanceX, 2.0f, 3.0f, 4.0f);
+//    planeY = makePlane(reflectanceY);
+//    planeZ = makePlane(reflectanceZ);
 
     glEnable(GL_NORMALIZE);
 }
@@ -154,8 +156,9 @@ void ObjectOpenGL::paintGL(  )
     glMatrixMode(GL_MODELVIEW);
 }
 
-GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
+GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance, double x, double y, double z){
   std::cout << "Make Plane called"<<std::endl;
+
   GLuint list = glGenLists(1);
   glNewList(list, GL_COMPILE);
   glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance);
@@ -166,55 +169,65 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
 
   textGL.setFont(QFont("Arial", 2));
 
-  for (float i=0; i<=5.0; i+=0.2){
+  float peak = 0.0f;
+
+  if(x>y&&x>z) {
+      peak = x;
+  } else if(y>x&&y>z) {
+      peak = y;
+  } else {
+      peak = z;
+  }
+
+  for (float i=0; i<=peak; i+=0.2){
       //front XY-polygon
       glBegin(GL_LINES);
       qglColor(X_GridColor);
       glVertex3d(i, 0.0, 0.0);
-      glVertex3d(i, 5.0, 0.0);
+      glVertex3d(i, peak, 0.0);
       glEnd();
 
       glBegin(GL_LINES);
       qglColor(X_GridColor);
       glVertex3d(0.0, i, 0.0);
-      glVertex3d(5.0, i, 0.0);
+      glVertex3d(peak, i, 0.0);
       glEnd();
 
       float b = (floor(i));
       if ((int)(i*100) - (int)(b*100) == 0){
-          list = textGL.renderText(list, QString::number(i, 'f', 1), 5.0f, i, 0.0f, 0.08f);
+          QString v = QString::number(i, 'f', 1);
+          list = textGL.renderText(list, v, peak, i,    0.0f, 0.08f);
+          list = textGL.renderText(list, v, i,    peak, 0.0f, 0.08f);
         }
     }
 
 
-  for (float i=0; i<=5.0; i+=0.2){
+  for (float i=0; i<=peak; i+=0.2){
       //front YZ-polygon
       glBegin(GL_LINES);
       qglColor(Y_GridColor);
       glVertex3d(0.0, i, 0.0);
-      glVertex3d(0.0, i, 5.0);
+      glVertex3d(0.0, i, peak);
       glEnd();
 
       glBegin(GL_LINES);
       qglColor(Y_GridColor);
       glVertex3d(0.0, 0.0, i);
-      glVertex3d(0.0, 5.0, i);
+      glVertex3d(0.0, peak, i);
       glEnd();
-
-//      list = textGL.renderText(list, QString::number(i, 'f', 1), 0.0f, 5.0f, i, 0.08f);
     }
 
-  for (float i=0; i<=5.0; i+=0.2){
+  for (float i=0; i<=peak; i+=0.2){
       //front ZX-polygon
       glBegin(GL_LINES);
       qglColor(Z_GridColor);
       glVertex3d(i, 0.0, 0.0);
-      glVertex3d(i, 0.0, 5.0);
+      glVertex3d(i, 0.0, peak);
       glEnd();
 
       glBegin(GL_LINES);
       glVertex3d(0.0, 0.0, i);
-      glVertex3d(5.0, 0.0, i);
+      glVertex3d(peak, 0.0, i);
       glEnd();
     }
 
@@ -225,6 +238,7 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance){
 
 
 void ObjectOpenGL::drawPlane(GLuint plane, GLdouble dx, GLdouble dy, GLdouble dz, GLdouble angle){
+  std::cout<<"draw plane called"<<std::endl;
   glPushMatrix();
 
   glRotated(angle, 0.0, 0.0, 1.0);
@@ -287,6 +301,7 @@ void ObjectOpenGL::resizeGL(int width, int height)
 
 void ObjectOpenGL::Draw_Box()
 {
+  std::cout<<"Draw Box called"<<std::endl;
     /*
     glPushMatrix();
 

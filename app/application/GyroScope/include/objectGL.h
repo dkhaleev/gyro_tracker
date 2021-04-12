@@ -53,7 +53,7 @@ private:
     void Draw_Box();
     void NormalizeAngle(int *angle);
 
-    GLuint      makePlane(const GLfloat *reflectance);
+    GLuint      makePlane(const GLfloat *reflectance, double x=0, double y=0, double z=0);
     void        drawPlane(GLuint plane, GLdouble dx, GLdouble dy, GLdouble dz, GLdouble angle);
 
     GLuint      planeX;
