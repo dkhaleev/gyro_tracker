@@ -170,6 +170,7 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance, double x, double y, d
   textGL.setFont(QFont("Arial", 2));
 
   float peak = 0.0f;
+  float limit = 0.0f;
 
   if(x>y&&x>z) {
       peak = x;
@@ -179,7 +180,9 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance, double x, double y, d
       peak = z;
   }
 
-  for (float i=0; i<=peak; i+=0.2){
+  limit = peak + 0.1f;
+
+  for (float i=0; i <= limit; i+=0.2){
       //front XY-polygon
       glBegin(GL_LINES);
       qglColor(X_GridColor);
@@ -193,16 +196,21 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance, double x, double y, d
       glVertex3d(peak, i, 0.0);
       glEnd();
 
+      //render plane legend
       float b = (floor(i));
       if ((int)(i*100) - (int)(b*100) == 0){
           QString v = QString::number(i, 'f', 1);
-          list = textGL.renderText(list, v, peak, i,    0.0f, 0.08f);
-          list = textGL.renderText(list, v, i,    peak, 0.0f, 0.08f);
+          list = textGL.renderText(list, v, peak, i,    0.0f, 0.08f, QString("x"));
+          list = textGL.renderText(list, v, i,    peak, 0.0f, 0.08f, QString("x"));
         }
+
+
+      i+=0.2;
+      std::cout << "i is: " << i << " peak is: " << peak << " equal " << (i == peak) << std::endl;
+
     }
 
-
-  for (float i=0; i<=peak; i+=0.2){
+  for (float i=0; i<=limit; i+=0.2){
       //front YZ-polygon
       glBegin(GL_LINES);
       qglColor(Y_GridColor);
@@ -215,9 +223,16 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance, double x, double y, d
       glVertex3d(0.0, 0.0, i);
       glVertex3d(0.0, peak, i);
       glEnd();
+
+      float b = (floor(i));
+      if ((int)(i*100) - (int)(b*100) == 0){
+          QString v = QString::number(i, 'f', 1);
+          list = textGL.renderText(list, v, 0.0f, peak, i, 0.08f, QString("y"));
+          list = textGL.renderText(list, v, 0.0f, i,    peak,    0.08f, QString("y"));
+        }
     }
 
-  for (float i=0; i<=peak; i+=0.2){
+  for (float i=0; i<=limit; i+=0.2){
       //front ZX-polygon
       glBegin(GL_LINES);
       qglColor(Z_GridColor);
@@ -229,6 +244,13 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance, double x, double y, d
       glVertex3d(0.0, 0.0, i);
       glVertex3d(peak, 0.0, i);
       glEnd();
+
+      float b = (floor(i));
+      if ((int)(i*100) - (int)(b*100) == 0){
+          QString v = QString::number(i, 'f', 1);
+          list = textGL.renderText(list, v, peak, 0.0f,    i, 0.08f, QString("z"));
+          list = textGL.renderText(list, v, i,    0.0f, peak, 0.08f, QString("z"));
+        }
     }
 
   glEndList();

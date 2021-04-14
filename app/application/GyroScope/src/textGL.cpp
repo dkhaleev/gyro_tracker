@@ -57,7 +57,7 @@ void TextGL::setColour(QColor &fontColor){
   this->fontColor = &fontColor;
 }
 
-GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, float z, float scale){
+GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, float z, float scale, QString plane){
   y = 0 - y; //invert Y because of tesselator mirroring
   QPainterPath path;
   path.addText(QPointF(0, 0), this->font, textString);
@@ -85,7 +85,18 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
 //  glTranslatef(x, y, -0.00f); // Move right and into the screen
 
   GLdouble rot = 0.0f;
-  glRotatef(rot, 0.0f, 0.0f, 0.0f);
+  GLfloat rot_x = 0.0f;
+  GLfloat rot_y = 0.0f;
+  GLfloat rot_z = 0.0f;
+  if(plane=="x"){
+
+    }else if(plane=="y"){
+
+
+    }else if(plane=="z"){
+
+    }
+  glRotatef(rot, rot_x, rot_y, rot_z);
 
 
   glCullFace(GL_FRONT);
@@ -136,12 +147,12 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
           glBegin(GL_QUAD_STRIP);
           QPolygonF::iterator p;
           for (p = (*it).begin(); p != it->end(); p++) {
-              glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, 0.0f*scale);
-              glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, -0.1f*scale);
+              glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, (0.0f*scale)+z);
+              glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, (-0.1f*scale)+z);
           }
           p = (*it).begin();
-          glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, 0.0f*scale); // draw the closing quad
-          glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, -0.1f*scale); // of the "wrapping"
+          glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, (0.0f*scale)+z); // draw the closing quad
+          glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, (-0.1f*scale)+z); // of the "wrapping"
           glEnd();
       }
 
