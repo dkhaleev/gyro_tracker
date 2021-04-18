@@ -200,14 +200,9 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance, double x, double y, d
       float b = (floor(i));
       if ((int)(i*100) - (int)(b*100) == 0){
           QString v = QString::number(i, 'f', 1);
-          list = textGL.renderText(list, v, peak, i,    0.0f, 0.08f, QString("x"));
-          list = textGL.renderText(list, v, i,    peak, 0.0f, 0.08f, QString("x"));
+          list = textGL.renderText(list, v, -0.2f, peak, i,    0.0f, 0.08f, QString("x"), 0.0f, 0.0f);
+          list = textGL.renderText(list, v, -0.2f, i,    peak, 0.0f, 0.08f, QString("x"), 0.0f, 0.0f);
         }
-
-
-      i+=0.2;
-      std::cout << "i is: " << i << " peak is: " << peak << " equal " << (i == peak) << std::endl;
-
     }
 
   for (float i=0; i<=limit; i+=0.2){
@@ -227,8 +222,8 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance, double x, double y, d
       float b = (floor(i));
       if ((int)(i*100) - (int)(b*100) == 0){
           QString v = QString::number(i, 'f', 1);
-          list = textGL.renderText(list, v, 0.0f, peak, i, 0.08f, QString("y"));
-          list = textGL.renderText(list, v, 0.0f, i,    peak,    0.08f, QString("y"));
+          list = textGL.renderText(list, v, -0.2f, 0.0f, peak, i,    0.08f, QString("y"), 0.0f, 0.0f);
+          list = textGL.renderText(list, v, -0.2f, 0.0f, i,    peak, 0.08f, QString("y"), 0.0f, 0.4f);
         }
     }
 
@@ -248,8 +243,8 @@ GLuint ObjectOpenGL::makePlane(const GLfloat *reflectance, double x, double y, d
       float b = (floor(i));
       if ((int)(i*100) - (int)(b*100) == 0){
           QString v = QString::number(i, 'f', 1);
-          list = textGL.renderText(list, v, peak, 0.0f,    i, 0.08f, QString("z"));
-          list = textGL.renderText(list, v, i,    0.0f, peak, 0.08f, QString("z"));
+          list = textGL.renderText(list, v, -0.2f, peak, 0.0f,    i, 0.08f, QString("z"), 0.2f, 0.0f);
+          list = textGL.renderText(list, v, -0.2f, i,    0.0f, peak, 0.08f, QString("z"), 0.0f, 0.4f);
         }
     }
 
