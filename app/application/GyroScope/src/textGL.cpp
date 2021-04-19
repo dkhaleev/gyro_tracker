@@ -46,18 +46,23 @@ void TextGL::setPlane(QString plane){
   this->plane = &plane;
 }
 
-
-void TextGL::setThickness(float thickness){
-  QTextStream(stdout) << "TextGL: Set thickness: " << thickness << "\r\n";
-  this->thickness = &thickness;
-}
-
 void TextGL::setColour(QColor &fontColor){
   QTextStream(stdout) << "TextGL: Set colour " << "\r\n";
   this->fontColor = &fontColor;
 }
 
-GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, float z, float scale, QString plane){
+GLuint TextGL::renderText(
+    GLuint list,
+    QString textString,
+    float thickness,
+    float x,
+    float y,
+    float z,
+    float scale,
+    QString plane,
+    float offsetX,
+    float offsetY
+    ){
   y = 0 - y; //invert Y because of tesselator mirroring
   QPainterPath path;
   path.addText(QPointF(0, 0), this->font, textString);
@@ -88,9 +93,9 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
   GLfloat rot_x = 0.0f;
   GLfloat rot_y = 0.0f;
   GLfloat rot_z = 0.0f;
-  if(plane=="x"){
+  if(plane=="x"){//XY-plane. Do nothing
 
-    }else if(plane=="y"){
+    }else if(plane=="y"){//YZ-plane
 
 
     }else if(plane=="z"){
@@ -108,9 +113,19 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
 
       for(int i=0; i<polygon.count(); i++){
           QPointF point = polygon.at(i);
-          vertices[i][0] = (point.rx()*scale)+x;
-          vertices[i][1] = (-point.ry()*scale)-y;
-          vertices[i][2] = (0.0f*scale)+z;
+          if(plane == "x"){
+              vertices[i][0] = (point.rx()*scale)+x+offsetX;
+              vertices[i][1] = (-point.ry()*scale)-y+offsetY;
+              vertices[i][2] = (0.0f*scale)+z;
+            } else if(plane == "y"){
+              vertices[i][0] = (0.0f*scale)+x+offsetX;
+              vertices[i][1] = (-point.ry()*scale)-y;
+              vertices[i][2] = (-point.rx()*scale)+z+offsetY;
+            }else if(plane == "z"){
+              vertices[i][0] = (point.ry()*scale)+x+offsetX;
+              vertices[i][1] = (0.0f*scale)+y;
+              vertices[i][2] = (-point.rx()*scale)+z+offsetY;
+            }
         }
 
         gluTessBeginContour(tess);
@@ -126,12 +141,21 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
   gluTessBeginPolygon(tess, 0 );
   foreach(QPolygonF polygon, path.toSubpathPolygons()){
       GLdouble (*vertices)[3] = new GLdouble[polygon.count()][3];
-
       for(int i=0; i<polygon.count(); i++){
           QPointF point = polygon.at(i);
-          vertices[i][0] = (point.rx()*scale)+x;
-          vertices[i][1] = (-point.ry()*scale)-y;
-          vertices[i][2] = (-0.1f*scale)+z;
+          if(plane == "x"){
+              vertices[i][0] = (point.rx()*scale)+x+offsetX;
+              vertices[i][1] = (-point.ry()*scale)-y+offsetY;
+              vertices[i][2] = (thickness*scale)+z;
+            } else if(plane == "y"){
+              vertices[i][0] = (thickness*scale)+x+offsetX;
+              vertices[i][1] = (-point.ry()*scale)-y;
+              vertices[i][2] = (-point.rx()*scale)+z+offsetY;
+            }else if(plane == "z"){
+              vertices[i][0] = (point.ry()*scale)+x+offsetX;
+              vertices[i][1] = (thickness*scale)+y;
+              vertices[i][2] = (-point.rx()*scale)+z+offsetY;
+            }
         }
 
         gluTessBeginContour(tess);
@@ -142,17 +166,32 @@ GLuint TextGL::renderText(GLuint list, QString textString, float x, float y, flo
    }
    gluTessEndPolygon(tess);
 
-
    for (QList<QPolygonF>::iterator it = poly.begin(); it != poly.end(); it++) {
           glBegin(GL_QUAD_STRIP);
           QPolygonF::iterator p;
           for (p = (*it).begin(); p != it->end(); p++) {
-              glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, (0.0f*scale)+z);
-              glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, (-0.1f*scale)+z);
+              if(plane=="x"){
+                  glVertex3f((p->rx()*scale)+x+offsetX, (-p->ry()*scale)-y+offsetY, (0.0f*scale)+z);
+                  glVertex3f((p->rx()*scale)+x+offsetX, (-p->ry()*scale)-y+offsetY, (thickness*scale)+z);
+                }else if(plane=="y"){
+                  glVertex3f((0.0f*scale)+x, (-p->ry()*scale)-y, (-p->rx()*scale)+z+offsetY);
+                  glVertex3f((thickness*scale)+x, (-p->ry()*scale)-y, (-p->rx()*scale)+z+offsetY);
+                }else if(plane=="z"){
+                  glVertex3f((p->ry()*scale)+x+offsetX, (0.0f*scale)+y, (-p->rx()*scale)+z+offsetY);
+                  glVertex3f((p->ry()*scale)+x+offsetX, (thickness*scale)+y, (-p->rx()*scale)+z+offsetY);
+                }
           }
           p = (*it).begin();
-          glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, (0.0f*scale)+z); // draw the closing quad
-          glVertex3f((p->rx()*scale)+x, (-p->ry()*scale)-y, (-0.1f*scale)+z); // of the "wrapping"
+          if(plane=="x"){
+              glVertex3f((p->rx()*scale)+x+offsetX, (-p->ry()*scale)-y+offsetY, (0.0f*scale)+z); // draw the closing quad
+              glVertex3f((p->rx()*scale)+x+offsetX, (-p->ry()*scale)-y+offsetY, (thickness*scale)+z); // of the "wrapping"
+            }else if(plane=="y"){
+              glVertex3f((0.0f*scale)+x, (-p->ry()*scale)-y, (-p->rx()*scale)+z+offsetY);
+              glVertex3f((thickness*scale)+x, (-p->ry()*scale)-y, (-p->rx()*scale)+z+offsetY);
+            }else if(plane=="z"){
+              glVertex3f((p->ry()*scale)+x+offsetX, (0.0f*scale)+y, (-p->rx()*scale)+z+offsetY);
+              glVertex3f((p->ry()*scale)+x+offsetX, (thickness*scale)+y, (-p->rx()*scale)+z+offsetY);
+            }
           glEnd();
       }
 
