@@ -93,16 +93,8 @@ GLuint TextGL::renderText(
   GLfloat rot_x = 0.0f;
   GLfloat rot_y = 0.0f;
   GLfloat rot_z = 0.0f;
-  if(plane=="x"){//XY-plane. Do nothing
 
-    }else if(plane=="y"){//YZ-plane
-
-
-    }else if(plane=="z"){
-
-    }
   glRotatef(rot, rot_x, rot_y, rot_z);
-
 
   glCullFace(GL_FRONT);
   glEnable(GL_CULL_FACE);
@@ -198,7 +190,6 @@ GLuint TextGL::renderText(
   gluTessEndPolygon(tess);
   gluDeleteTess(tess);
 
-  glDisable(GL_DEPTH_TEST);
   return list;
 }
 

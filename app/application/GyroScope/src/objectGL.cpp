@@ -319,7 +319,7 @@ void ObjectOpenGL::resizeGL(int width, int height)
 void ObjectOpenGL::Draw_Box()
 {
   std::cout<<"Draw Box called"<<std::endl;
-    /*
+
     glPushMatrix();
 
     glRotated(angle_z , 0.0, 0.0, 1.0);
@@ -400,7 +400,6 @@ void ObjectOpenGL::Draw_Box()
     glEnd();
 
     glPopMatrix();
-    */
 }
 
 // Draw the frame (X,Y and Z axis)
