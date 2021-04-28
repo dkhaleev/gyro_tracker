@@ -7,6 +7,7 @@
 #include "graphTab.h"
 #include "consoleTab.h"
 #include <QMainWindow>
+#include <MadgwickAHRS.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -38,6 +39,9 @@ private slots:
 
   //input stream reader
   void onTimerReadData();
+
+  //update GL object
+  void onTimerUpdateGL();
 
   //main dispatcher. Replace by signals structure later
   void stateWasModified();

@@ -73,6 +73,12 @@ MainWindow::MainWindow(QWidget *parent, int w, int h)
   QTimer *timerArduino = new QTimer();
   timerArduino->connect(timerArduino, SIGNAL(timeout()),this, SLOT(onTimerReadData()));
   timerArduino->start(10);
+
+// Timer for GL redraw
+  QTimer *timerGL = new QTimer();
+  timerGL->connect(timerGL, SIGNAL(timeout()), this, SLOT(onTimerUpdateGL()));
+  timerGL->start(50);
+
 //  connect(console, SIGNAL(getData(QByteArray)), this, SLOT(writeData(QByteArray)));
   createActions();
   createMenus();
@@ -216,6 +222,10 @@ void MainWindow::createToolBars(){
 void MainWindow::resizeEvent(QResizeEvent *){
   tabs->setMinimumSize(centralWidget()->size());
   tabs->setMaximumSize(centralWidget()->size());
+}
+
+void MainWindow::onTimerUpdateGL(){
+  objectGL->updateGL();
 }
 
 //Status Bar
@@ -386,6 +396,27 @@ void MainWindow::onTimerReadData(){
               objectGL->setAccelerometer(ax, ay, az);
               objectGL->setGyroscope(gx, gy, gz);
               objectGL->setMagnetometer(mx, my, mz);
+
+
+              MadgwickAHRSupdate(gx,gy,gz,ax,ay,az,mx,my,mz);
+              //        MadgwickAHRSupdateIMU(gx,gy,gz,ax,ay,az);
+              //        std::cout << q0 << " \t" << q1 << " \t" << q2 << " \t" << q3 << std::endl;
+
+              double R11 = 2.*q0*q0 -1 +2.*q1*q1;
+              double R21 = 2.*(q1*q2 - q0*q3);
+              double R31 = 2.*(q1*q3 + q0*q2);
+              double R32 = 2.*(q2*q3 - q0*q1);
+              double R33 = 2.*q0*q0 -1 +2.*q3*q3;
+
+              double phi = atan2(R32, R33 );
+              double theta = -atan(R31 / sqrt(1-R31*R31) );
+              double psi = atan2(R21, R11 );
+
+
+
+              std::cout << R31 << "\t" << phi*180./M_PI << "\t" << theta*180./M_PI << "\t" << psi*180./M_PI << std::endl;
+              objectGL->setAngles(phi*180./M_PI , theta*180./M_PI , psi*180./M_PI );
+
           }
 
         }

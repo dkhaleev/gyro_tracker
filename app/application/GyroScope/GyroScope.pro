@@ -28,6 +28,7 @@ TARGET =        GyroScope
 TEMPLATE =      app
 
 SOURCES += \
+        src/MadgwickAHRS.cpp \
         src/console.cpp \
         src/consoleTab.cpp \
         src/generalTab.cpp \
@@ -43,6 +44,7 @@ SOURCES += \
         src/textGL.cpp
 
 HEADERS += \
+        include/MadgwickAHRS.h \
         include/console.h \
         include/consoleTab.h \
         include/generalTab.h \
