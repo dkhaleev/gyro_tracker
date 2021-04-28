@@ -6,8 +6,12 @@
 #define Debug             false //general debug
 #define SerialDebug       true //serial debug messaging
 #define RadioEnabled      true //enable nRF24l01+ radio communication module
-//#define AHRS              true //calculate AHRS on board and send Euler angles  
+#define AHRS              true //calculate AHRS on board and send Euler angles  
                                //or send sensor values only
+#ifdef AHRS
+  #define MAHONY          false //select filter engine
+  #define MADGWICK        true  //
+#endif
 #define I2Cclock 400000
 #define I2Cport Wire
 #define MPU9250_ADDRESS MPU9250_ADDRESS_AD0   // Use either this line or the next to select which I2C address your device is using
@@ -113,7 +117,7 @@ void setup(){
   // Arduino initializations
   Wire.begin();
   TWBR = 12;  // 400 kbit/sec I2C speed
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   //Radio setup
   if(RadioEnabled){
@@ -345,6 +349,7 @@ void loop()
   // Must be called before updating quaternions!
   myIMU.updateTime();
 
+#ifdef AHRS
     // Sensors x (y)-axis of the accelerometer is aligned with the y (x)-axis of
   // the magnetometer; the magnetometer z-axis (+ down) is opposite to z-axis
   // (+ up) of accelerometer and gyro! We have to make some allowance for this
@@ -353,13 +358,16 @@ void loop()
   // along the x-axis just like in the LSM9DS0 sensor. This rotation can be
   // modified to allow any convenient orientation convention. This is ok by
   // aircraft orientation standards! Pass gyro rate as rad/s
-//  MahonyQuaternionUpdate(myIMU.ax, myIMU.ay, myIMU.az, myIMU.gx * DEG_TO_RAD,
-//                         myIMU.gy * DEG_TO_RAD, myIMU.gz * DEG_TO_RAD, myIMU.my,
-//                         myIMU.mx, -myIMU.mz, myIMU.deltat);
+#ifdef MAHONY
+    MahonyQuaternionUpdate(myIMU.ax, myIMU.ay, myIMU.az, myIMU.gx * DEG_TO_RAD,
+                         myIMU.gy * DEG_TO_RAD, myIMU.gz * DEG_TO_RAD, myIMU.my,
+                         myIMU.mx, -myIMU.mz, myIMU.deltat);
+#endif
+#ifdef MADGWICK    
     MadgwickQuaternionUpdate(myIMU.ax, myIMU.ay, myIMU.az, myIMU.gx * DEG_TO_RAD,
                          myIMU.gy * DEG_TO_RAD, myIMU.gz * DEG_TO_RAD, myIMU.my,
                          myIMU.mx, -myIMU.mz, myIMU.deltat);
-
+#endif
 
     myIMU.tempCount = myIMU.readTempData();  // Read the adc values
     // Temperature in degrees Centigrade
@@ -371,7 +379,7 @@ void loop()
     payload.core_time   = millis() - ti;
 //    payload.temperature = myIMU.temperature;
   
-#ifdef AHRS
+
       myIMU.delt_t = millis() - myIMU.count;
 // Define output variables from updated quaternion---these are Tait-Bryan
 // angles, commonly used in aircraft orientation. In this coordinate system,
